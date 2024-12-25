@@ -1,5 +1,7 @@
-package com.vce.vce._shared.exception;
+package com.vce.vce._shared.exception.handler;
 
+import com.vce.vce._shared.exception.EntityAlreadyExistsException;
+import com.vce.vce._shared.exception.ErrorResponse;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -9,7 +11,6 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 @RestControllerAdvice

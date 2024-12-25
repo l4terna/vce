@@ -4,42 +4,57 @@ import com.vce.vce.auth.dto.AuthDTO;
 import com.vce.vce.auth.dto.LoginDTO;
 import com.vce.vce.auth.dto.RegisterDTO;
 import com.vce.vce.auth.exception.InvalidCredentials;
-import com.vce.vce.user.UserMapper;
+import com.vce.vce.token.TokenService;
+import com.vce.vce.token.dto.CreateTokenDTO;
+import com.vce.vce.token.dto.TokenDTO;
 import com.vce.vce.user.UserService;
 import com.vce.vce.user.dto.UserDTO;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
 public class AuthService {
     private final UserService userService;
-    private final JwtService jwtService;
-    private final UserMapper userMapper;
-    private final PasswordEncoder passwordEncoder;
+    private final TokenService tokenService;
 
-    public AuthDTO register(RegisterDTO registerDTO) {
+    public AuthDTO register(RegisterDTO registerDTO, String fingerprint) {
         UserDTO userDTO = userService.createUser(registerDTO);
-        String token = jwtService.generateToken(userMapper.toEntity(userDTO));
+        TokenDTO tokenDTO = tokenService.createToken(
+                CreateTokenDTO.builder()
+                        .fingerprint(fingerprint)
+                        .user(userDTO)
+                        .build()
+        );
 
         return AuthDTO.builder()
                 .user(userDTO)
-                .token(token)
+                .token(tokenDTO)
                 .build();
     }
 
-    public AuthDTO login(LoginDTO loginDTO) {
+    public AuthDTO login(LoginDTO loginDTO, String fingerprint) {
         if (!userService.matchPassword(loginDTO.email(), loginDTO.password())) {
             throw new InvalidCredentials("Incorrect email or password");
         }
 
         UserDTO userDTO = userService.getByEmail(loginDTO.email());
-        String token = jwtService.generateToken(userMapper.toEntity(userDTO));
+        TokenDTO tokenDTO = tokenService.createToken(
+                CreateTokenDTO.builder()
+                        .fingerprint(fingerprint)
+                        .user(userDTO)
+                        .build()
+        );
 
         return AuthDTO.builder()
                 .user(userDTO)
-                .token(token)
+                .token(tokenDTO)
                 .build();
+    }
+
+    public void logout(String token, String fingerprint) {
+        tokenService.revokeToken(token, fingerprint);
+        SecurityContextHolder.clearContext();
     }
 }

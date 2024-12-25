@@ -3,15 +3,13 @@ package com.vce.vce.auth;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
+import lombok.Getter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
-import java.util.Base64;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Function;
 
 @Service
@@ -19,6 +17,7 @@ public class JwtService {
     @Value("${jwt.token}")
     private String jwtKey;
 
+    @Getter
     @Value("${jwt.expiration}")
     private Long jwtExpiration;
 
@@ -55,8 +54,9 @@ public class JwtService {
                 .subject(userDetails.getUsername())
                 .claims(claims)
                 .issuedAt(new Date())
-                .expiration(new Date(System.currentTimeMillis() + jwtExpiration))
+                .expiration(new Date(System.currentTimeMillis() + jwtExpiration * 1000))
                 .signWith(getSigningKey())
+                .id(UUID.randomUUID().toString())
                 .compact();
     }
 
