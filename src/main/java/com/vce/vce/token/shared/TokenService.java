@@ -45,17 +45,7 @@ public abstract class TokenService<T extends TokenEntity> {
 
     @Transactional
     public void revokeActiveTokens(UserSession userSession) {
-        List<T> tokens = tokenRepository.findAllActiveTokensByUserSession(userSession)
-                .stream()
-                .peek(token -> token.setIsRevoked(true))
-                .toList();
-
-        tokenRepository.saveAll(tokens);
-    }
-
-    @Transactional
-    public void revokeToken(UserSession userSession, String token) {
-
+        tokenRepository.revokeAllActiveTokensByUserSession(userSession);
     }
 
     public abstract boolean validateToken(String token, String fingerprint);

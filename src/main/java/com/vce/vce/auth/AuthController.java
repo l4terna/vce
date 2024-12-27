@@ -26,9 +26,10 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<AuthDTO> login(
             @Valid @RequestBody LoginDTO loginDTO,
+            @CookieValue String fingerprint,
             HttpServletResponse response
     ) {
-        return ResponseEntity.ok(authService.login(loginDTO, response));
+        return ResponseEntity.ok(authService.login(loginDTO, fingerprint, response));
     }
 
     @PostMapping("/refresh")
@@ -42,9 +43,10 @@ public class AuthController {
     @PostMapping("/logout")
     public ResponseEntity<Void> logout(
             @CookieValue(name = "refresh_token") String refreshToken,
+            @CookieValue String fingerprint,
             HttpServletResponse response
     ) {
-        authService.logout(refreshToken, response);
+        authService.logout(refreshToken, fingerprint, response);
         return ResponseEntity.noContent().build();
     }
 }

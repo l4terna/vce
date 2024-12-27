@@ -44,12 +44,13 @@ public class AuthService {
     }
 
     @Transactional
-    public AuthDTO login(LoginDTO loginDTO, HttpServletResponse response) {
+    public AuthDTO login(LoginDTO loginDTO, String fingerprint, HttpServletResponse response) {
         if (!userService.matchPassword(loginDTO.email(), loginDTO.password())) {
             throw new AccessDeniedException("Invalid email or password");
         }
 
         User user = userService.findByEmail(loginDTO.email());
+        userSessionService.deactivatePreviousFingerprintSessions(user, fingerprint);
         TokenDTO accessTokenDTO = createAuthenticationSession(user, response);
 
         return AuthDTO.builder()
@@ -69,6 +70,8 @@ public class AuthService {
                 .user(user)
                 .build();
 
+        accessTokenService.revokeActiveTokens(userSession);
+
         TokenDTO accessTokenDTO = accessTokenService.createToken(createTokenDTO);
         TokenDTO refreshTokenDTO = refreshTokenService.createToken(createTokenDTO);
 
@@ -85,12 +88,23 @@ public class AuthService {
         return accessTokenDTO;
     }
 
-    public void logout(String refreshToken, HttpServletResponse response) {
+    @Transactional
+    public void logout(String refreshToken, String fingerprint, HttpServletResponse response) {
         RefreshToken refreshTokenEntity = refreshTokenService.findByToken(refreshToken);
-        userSessionService.deactivateSession(refreshTokenEntity.getUserSession());
+
+        if (!refreshTokenService.validateToken(refreshToken, fingerprint)) {
+            userSessionService.deactivateSessionCompletely(refreshTokenEntity.getUserSession());
+
+            throw new AccessDeniedException("Invalid refresh token");
+        }
+
+        userSessionService.deactivateSessionCompletely(refreshTokenEntity.getUserSession());
 
         ResponseCookie refreshTokenCookie = ResponseCookie.from("refresh_token", "")
                 .maxAge(0)
+                //.secure(true)
+                .path("/api/auth")
+                .sameSite("Strict")
                 .build();
 
         response.addHeader(HttpHeaders.SET_COOKIE, refreshTokenCookie.toString());
@@ -101,7 +115,7 @@ public class AuthService {
         RefreshToken refreshTokenEntity = refreshTokenService.findByToken(refreshToken);
 
         if (!refreshTokenService.validateToken(refreshToken, fingerprint)) {
-            userSessionService.deactivateSession(refreshTokenEntity.getUserSession());
+            userSessionService.deactivateSessionCompletely(refreshTokenEntity.getUserSession());
 
             throw new AccessDeniedException("Invalid refresh token");
         }

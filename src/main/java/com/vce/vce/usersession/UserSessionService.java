@@ -2,6 +2,7 @@ package com.vce.vce.usersession;
 
 import com.vce.vce.token.access.AccessTokenService;
 import com.vce.vce.token.refresh.RefreshTokenService;
+import com.vce.vce.user.User;
 import com.vce.vce.usersession.dto.CreateUserSessionDTO;
 import eu.bitwalker.useragentutils.UserAgent;
 import jakarta.servlet.http.Cookie;
@@ -13,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.Arrays;
+import java.util.List;
 
 
 @Service
@@ -88,13 +90,18 @@ public class UserSessionService {
     }
 
     @Transactional
-    public void deactivateSession(UserSession userSession) {
+    public void deactivateSessionCompletely(UserSession userSession) {
         userSession.setIsActive(false);
 
         refreshTokenService.revokeActiveTokens(userSession);
         accessTokenService.revokeActiveTokens(userSession);
 
         userSessionRepository.save(userSession);
+    }
+
+    @Transactional
+    public void deactivatePreviousFingerprintSessions(User user, String fingerprint) {
+        userSessionRepository.deactivateSessionsByFingerprintAndUser(fingerprint, user);
     }
 
 }
