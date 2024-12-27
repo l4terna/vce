@@ -1,6 +1,6 @@
 package com.vce.vce.auth.dto;
 
-import com.vce.vce.token.dto.TokenDTO;
+import com.vce.vce.token.shared.dto.TokenDTO;
 import com.vce.vce.user.dto.UserDTO;
 import lombok.Builder;
 

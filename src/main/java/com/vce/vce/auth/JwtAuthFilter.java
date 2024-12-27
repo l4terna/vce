@@ -1,6 +1,6 @@
 package com.vce.vce.auth;
 
-import com.vce.vce.token.TokenService;
+import com.vce.vce.token.access.AccessTokenService;
 import com.vce.vce.user.CustomUserDetailsService;
 import io.micrometer.common.util.StringUtils;
 import jakarta.servlet.FilterChain;
@@ -25,7 +25,7 @@ import java.util.Arrays;
 public class JwtAuthFilter extends OncePerRequestFilter {
     private final JwtService jwtService;
     private final CustomUserDetailsService customUserDetailsService;
-    private final TokenService tokenService;
+    private final AccessTokenService accessTokenService;
 
 
     @Override
@@ -45,7 +45,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         String jwtToken = authHeader.substring(7);
         String username = jwtService.extractUsername(jwtToken);
 
-        if (!tokenService.validateToken(jwtToken, fingerprint)) {
+        if (!accessTokenService.validateToken(jwtToken, fingerprint)) {
             filterChain.doFilter(request, response);
             return;
         }
@@ -74,7 +74,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
     private String getFingerprint(HttpServletRequest request) {
         return Arrays.stream(request.getCookies())
-                .filter(cookie -> cookie.equals("fingerprint"))
+                .filter(cookie -> cookie.getName().equals("fingerprint"))
                 .map(Cookie::getValue)
                 .findFirst()
                 .orElse(null);

@@ -2,7 +2,6 @@ package com.vce.vce.auth.dto;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
 
 public record LoginDTO(
         @Email
@@ -10,7 +9,6 @@ public record LoginDTO(
         String email,
 
         @NotBlank
-        @Size(min = 6)
         String password
 ) {
 }

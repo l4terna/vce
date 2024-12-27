@@ -1,38 +1,39 @@
-package com.vce.vce.token;
+package com.vce.vce.usersession;
 
 import com.vce.vce._shared.entity.BaseEntity;
-import com.vce.vce.token.enumeration.TokenType;
 import com.vce.vce.user.User;
 import jakarta.persistence.*;
 import lombok.*;
+import lombok.experimental.SuperBuilder;
 
 import java.time.LocalDateTime;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
-@Builder
+@SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "tokens")
-public class Token extends BaseEntity {
+@Table(name = "user_sessions")
+public class UserSession extends BaseEntity {
     @Column(nullable = false)
-    private String accessToken;
+    private LocalDateTime lastActivity;
 
     @Column(nullable = false)
-    @Builder.Default
-    private Boolean isRevoked = false;
+    private String ipAddress;
 
     @Column(nullable = false)
-    private LocalDateTime expiresAt;
+    private String deviceInfo;
 
     @Column(nullable = false)
     private String fingerprint;
 
-    @Enumerated(EnumType.STRING)
-    private TokenType type;
+    @Column(nullable = false)
+    @Builder.Default
+    private Boolean isActive = true;
 
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
+
 }

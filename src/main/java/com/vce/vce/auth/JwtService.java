@@ -14,18 +14,16 @@ import java.util.function.Function;
 
 @Service
 public class JwtService {
-    @Value("${jwt.token}")
+    @Value("${jwt.secret}")
     private String jwtKey;
 
     @Getter
-    @Value("${jwt.expiration}")
-    private Long jwtExpiration;
+    @Value("${jwt.access.expiration}")
+    private Long jwtAccessExpiration;
 
-    public String generateToken(UserDetails userDetails) {
-        Map<String, Object> claims = new HashMap<>();
-
-        return generateToken(claims, userDetails);
-    }
+    @Getter
+    @Value("${jwt.refresh.expiration}")
+    private Long jwtRefreshExpiration;
 
     public boolean isTokenValid(String token, UserDetails userDetails) {
         String username = extractUsername(token);
@@ -49,12 +47,24 @@ public class JwtService {
         return extractClaims(token, Claims::getExpiration);
     }
 
-    private String generateToken(Map<String, Object> claims, UserDetails userDetails) {
+    public String generateAccessToken(UserDetails userDetails) {
+        return generateToken(new HashMap<>(), userDetails, jwtAccessExpiration);
+    }
+
+    public String generateRefreshToken(UserDetails userDetails) {
+        return generateToken(new HashMap<>(), userDetails, jwtRefreshExpiration);
+    }
+
+    private String generateToken(
+            Map<String, Object> claims,
+            UserDetails userDetails,
+            long expiration
+    ) {
         return Jwts.builder()
                 .subject(userDetails.getUsername())
                 .claims(claims)
                 .issuedAt(new Date())
-                .expiration(new Date(System.currentTimeMillis() + jwtExpiration * 1000))
+                .expiration(new Date(System.currentTimeMillis() + expiration * 1000))
                 .signWith(getSigningKey())
                 .id(UUID.randomUUID().toString())
                 .compact();

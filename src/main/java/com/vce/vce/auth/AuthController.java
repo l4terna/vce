@@ -1,10 +1,9 @@
 package com.vce.vce.auth;
 
-import com.sun.net.httpserver.HttpServer;
 import com.vce.vce.auth.dto.AuthDTO;
 import com.vce.vce.auth.dto.LoginDTO;
 import com.vce.vce.auth.dto.RegisterDTO;
-import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -18,28 +17,34 @@ public class AuthController {
 
     @PostMapping("/register")
     public ResponseEntity<AuthDTO> register(
-            @CookieValue String fingerprint,
-            @Valid @RequestBody RegisterDTO registerDTO
+            @Valid @RequestBody RegisterDTO registerDTO,
+            HttpServletResponse response
     ) {
-        return ResponseEntity.ok(authService.register(registerDTO, fingerprint));
+        return ResponseEntity.ok(authService.register(registerDTO, response));
     }
 
     @PostMapping("/login")
     public ResponseEntity<AuthDTO> login(
-            @CookieValue String fingerprint,
-            @Valid @RequestBody LoginDTO loginDTO
+            @Valid @RequestBody LoginDTO loginDTO,
+            HttpServletResponse response
     ) {
-        return ResponseEntity.ok(authService.login(loginDTO, fingerprint));
+        return ResponseEntity.ok(authService.login(loginDTO, response));
+    }
+
+    @PostMapping("/refresh")
+    public ResponseEntity<AuthDTO> refresh(
+            @CookieValue(name = "refresh_token") String refreshToken,
+            @CookieValue String fingerprint
+    ) {
+        return ResponseEntity.ok(authService.refreshToken(refreshToken, fingerprint));
     }
 
     @PostMapping("/logout")
     public ResponseEntity<Void> logout(
-            @CookieValue String fingerprint,
-            HttpServletRequest request
+            @CookieValue(name = "refresh_token") String refreshToken,
+            HttpServletResponse response
     ) {
-        String token = request.getHeader("Authorization").substring(7);
-
-        authService.logout(token, fingerprint);
+        authService.logout(refreshToken, response);
         return ResponseEntity.noContent().build();
     }
 }

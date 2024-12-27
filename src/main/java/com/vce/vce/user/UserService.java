@@ -17,13 +17,13 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
 
     @Transactional(readOnly = true)
-    public UserDTO getByEmail(String email) {
-        return userMapper.toDTO(userRepository.findByEmail(email)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found")));
+    public User findByEmail(String email) {
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
     }
 
     @Transactional
-    public UserDTO createUser(RegisterDTO registerDTO) {
+    public User createUser(RegisterDTO registerDTO) {
         if(userRepository.existsByEmail(registerDTO.email())) {
             throw new EntityAlreadyExistsException("User already exists");
         }
@@ -34,7 +34,12 @@ public class UserService {
                 .password(passwordEncoder.encode(registerDTO.password()))
                 .build();
 
-        return userMapper.toDTO(userRepository.save(user));
+        return userRepository.save(user);
+    }
+
+    @Transactional
+    public UserDTO create(RegisterDTO registerDTO) {
+        return userMapper.toDTO(createUser(registerDTO));
     }
 
     @Transactional(readOnly = true)
