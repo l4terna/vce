@@ -1,4 +1,4 @@
-package com.vce.vce._shared.entity;
+package com.vce.vce._shared.model.entity;
 
 import jakarta.persistence.*;
 import lombok.*;

@@ -2,7 +2,7 @@ package com.vce.vce.token.access;
 
 import com.vce.vce.token.shared.TokenMapper;
 import com.vce.vce.token.shared.TokenService;
-import com.vce.vce.auth.JwtService;
+import com.vce.vce._shared.security.jwt.JwtService;
 import com.vce.vce.token.shared.dto.CreateTokenDTO;
 import com.vce.vce.user.User;
 import jakarta.persistence.EntityNotFoundException;

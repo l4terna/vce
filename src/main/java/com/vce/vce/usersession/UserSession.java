@@ -1,6 +1,6 @@
 package com.vce.vce.usersession;
 
-import com.vce.vce._shared.entity.BaseEntity;
+import com.vce.vce._shared.model.entity.BaseEntity;
 import com.vce.vce.user.User;
 import jakarta.persistence.*;
 import lombok.*;

@@ -1,6 +1,6 @@
 package com.vce.vce.user;
 
-import com.vce.vce._shared.entity.BaseEntity;
+import com.vce.vce._shared.model.entity.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;

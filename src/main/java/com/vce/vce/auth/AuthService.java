@@ -1,5 +1,6 @@
 package com.vce.vce.auth;
 
+import com.vce.vce._shared.security.jwt.JwtService;
 import com.vce.vce.auth.dto.AuthDTO;
 import com.vce.vce.auth.dto.LoginDTO;
 import com.vce.vce.auth.dto.RegisterDTO;

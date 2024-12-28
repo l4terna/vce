@@ -1,8 +1,9 @@
 package com.vce.vce._shared.config;
 
 import com.vce.vce._shared.exception.handler.CustomAccessDeniedHandler;
-import com.vce.vce.auth.JwtAuthFilter;
-import com.vce.vce.auth.RestAuthenticationEntryPoint;
+import com.vce.vce._shared.security.UserContextFilter;
+import com.vce.vce._shared.security.jwt.JwtAuthFilter;
+import com.vce.vce._shared.security.jwt.RestAuthenticationEntryPoint;
 import com.vce.vce.user.CustomUserDetailsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -29,10 +30,14 @@ import java.util.List;
 public class SecurityConfig {
     private final JwtAuthFilter jwtAuthFilter;
     private final CustomUserDetailsService customUserDetailsService;
+    private final RestAuthenticationEntryPoint restAuthenticationEntryPoint;
+    private final CustomAccessDeniedHandler customAccessDeniedHandler;
+    private final UserContextFilter userContextFilter;
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http, RestAuthenticationEntryPoint restAuthenticationEntryPoint, CustomAccessDeniedHandler customAccessDeniedHandler) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http.csrf(AbstractHttpConfigurer::disable)
+                .anonymous(AbstractHttpConfigurer::disable)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .cors(cors -> requestCorsConfiguration())
                 .authorizeHttpRequests(request -> request
@@ -40,6 +45,7 @@ public class SecurityConfig {
                         .anyRequest().authenticated())
                 .authenticationProvider(authenticationProvider())
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterAfter(userContextFilter, JwtAuthFilter.class)
                 .exceptionHandling(exception -> exception
                         .authenticationEntryPoint(restAuthenticationEntryPoint)
                         .accessDeniedHandler(customAccessDeniedHandler))

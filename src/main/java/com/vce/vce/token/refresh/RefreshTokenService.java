@@ -1,6 +1,6 @@
 package com.vce.vce.token.refresh;
 
-import com.vce.vce.auth.JwtService;
+import com.vce.vce._shared.security.jwt.JwtService;
 import com.vce.vce.token.shared.TokenMapper;
 import com.vce.vce.token.shared.TokenService;
 import com.vce.vce.token.shared.dto.CreateTokenDTO;

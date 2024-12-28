@@ -1,11 +1,11 @@
-package com.vce.vce.auth;
+package com.vce.vce._shared.security.jwt;
 
+import com.vce.vce._shared.security.SecurityUtils;
 import com.vce.vce.token.access.AccessTokenService;
 import com.vce.vce.user.CustomUserDetailsService;
 import io.micrometer.common.util.StringUtils;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -18,7 +18,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-import java.util.Arrays;
 
 @Component
 @RequiredArgsConstructor
@@ -35,7 +34,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             FilterChain filterChain
     ) throws ServletException, IOException {
         String authHeader = request.getHeader("Authorization");
-        String fingerprint = getFingerprint(request);
+        String fingerprint = SecurityUtils.getFingerprint(request);
 
         if (StringUtils.isEmpty(authHeader) || !authHeader.startsWith("Bearer ") || fingerprint == null) {
             filterChain.doFilter(request, response);
@@ -70,13 +69,5 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         }
 
         filterChain.doFilter(request, response);
-    }
-
-    private String getFingerprint(HttpServletRequest request) {
-        return Arrays.stream(request.getCookies())
-                .filter(cookie -> cookie.getName().equals("fingerprint"))
-                .map(Cookie::getValue)
-                .findFirst()
-                .orElse(null);
     }
 }

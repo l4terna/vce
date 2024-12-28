@@ -1,20 +1,24 @@
 package com.vce.vce.usersession;
 
+import com.vce.vce._shared.model.dto.PageableDTO;
+import com.vce.vce._shared.security.UserContextHolder;
 import com.vce.vce.token.access.AccessTokenService;
 import com.vce.vce.token.refresh.RefreshTokenService;
 import com.vce.vce.user.User;
 import com.vce.vce.usersession.dto.CreateUserSessionDTO;
+import com.vce.vce.usersession.dto.UserSessionDTO;
 import eu.bitwalker.useragentutils.UserAgent;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.Arrays;
-import java.util.List;
 
 
 @Service
@@ -24,6 +28,7 @@ public class UserSessionService {
     private final HttpServletRequest httpServletRequest;
     private final RefreshTokenService refreshTokenService;
     private final AccessTokenService accessTokenService;
+    private final UserSessionMapper userSessionMapper;
 
     @Transactional
     public UserSession createUserSession(CreateUserSessionDTO createDTO) {
@@ -104,4 +109,29 @@ public class UserSessionService {
         userSessionRepository.deactivateSessionsByFingerprintAndUser(fingerprint, user);
     }
 
+    @Transactional(readOnly = true)
+    public Page<UserSessionDTO> getUserSessions(PageableDTO pageableDTO) {
+        return userSessionRepository.findAllAnotherActiveSessions(pageableDTO.toPageable(), UserContextHolder.getCurrentSession())
+                .map(userSessionMapper::toDTO);
+    }
+
+    @Transactional(readOnly = true)
+    public UserSession findActiveByFingerprint(String fingerprint, User user) {
+        return userSessionRepository.findActiveByFingerprintAndUser(fingerprint, user)
+                .orElseThrow(() -> new EntityNotFoundException("Session not found"));
+    }
+
+    @Transactional
+    public void deactivateSession(Long id) {
+        UserSession userSession = userSessionRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Session not found"));
+        userSession.setIsActive(false);
+        userSessionRepository.save(userSession);
+    }
+
+    @Transactional
+    public void deactivateAllOtherUserSessions() {
+        UserSession userSession = UserContextHolder.getCurrentSession();
+        userSessionRepository.deactivateAllOtherSessions(userSession);
+    }
 }

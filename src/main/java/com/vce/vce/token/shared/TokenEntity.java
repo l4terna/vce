@@ -1,6 +1,6 @@
 package com.vce.vce.token.shared;
 
-import com.vce.vce._shared.entity.BaseEntity;
+import com.vce.vce._shared.model.entity.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.EntityListeners;
 import jakarta.persistence.MappedSuperclass;

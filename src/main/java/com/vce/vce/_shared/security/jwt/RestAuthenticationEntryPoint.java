@@ -1,4 +1,4 @@
-package com.vce.vce.auth;
+package com.vce.vce._shared.security.jwt;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vce.vce._shared.exception.ErrorResponse;

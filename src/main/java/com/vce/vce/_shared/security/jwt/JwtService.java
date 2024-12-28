@@ -1,4 +1,4 @@
-package com.vce.vce.auth;
+package com.vce.vce._shared.security.jwt;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
