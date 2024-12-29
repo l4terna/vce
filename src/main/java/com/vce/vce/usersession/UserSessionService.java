@@ -105,8 +105,10 @@ public class UserSessionService {
     }
 
     @Transactional
-    public void deactivatePreviousFingerprintSessions(User user, String fingerprint) {
+    public void deactivatePreviousSessions(User user, String fingerprint) {
         userSessionRepository.deactivateSessionsByFingerprintAndUser(fingerprint, user);
+        accessTokenService.revokeActiveTokensByFingerprintAndUser(fingerprint, user);
+        refreshTokenService.revokeActiveTokensByFingerprintAndUser(fingerprint, user);
     }
 
     @Transactional(readOnly = true)

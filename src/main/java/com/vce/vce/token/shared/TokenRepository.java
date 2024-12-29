@@ -1,5 +1,6 @@
 package com.vce.vce.token.shared;
 
+import com.vce.vce.user.User;
 import com.vce.vce.usersession.UserSession;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -15,4 +16,10 @@ public interface TokenRepository<T extends TokenEntity> extends JpaRepository<T,
     @Modifying
     @Query("UPDATE #{#entityName} t SET t.isRevoked = true WHERE t.userSession = :userSession AND t.isRevoked = false")
     void revokeAllActiveTokensByUserSession(UserSession userSession);
+
+    @Modifying
+    @Query("UPDATE #{#entityName} t SET t.isRevoked = true " +
+            "WHERE t.userSession.fingerprint = :fingerprint " +
+            "AND t.userSession.user = :user")
+    void revokeActiveTokensByFingerprintAndUser(String fingerprint, User user);
 }

@@ -51,7 +51,7 @@ public class AuthService {
         }
 
         User user = userService.findByEmail(loginDTO.email());
-        userSessionService.deactivatePreviousFingerprintSessions(user, fingerprint);
+        userSessionService.deactivatePreviousSessions(user, fingerprint);
         TokenDTO accessTokenDTO = createAuthenticationSession(user, response);
 
         return AuthDTO.builder()

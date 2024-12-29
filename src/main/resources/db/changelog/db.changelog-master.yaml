@@ -7,3 +7,5 @@ databaseChangeLog:
       file: db/changelog/changes/3_create_access_tokens.sql
   - include:
       file: db/changelog/changes/4_create_refresh_tokens.sql
+  - include:
+      file: db/changelog/changes/5_create_hubs.sql

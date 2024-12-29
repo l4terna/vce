@@ -1,6 +1,6 @@
 package com.vce.vce._shared.config;
 
-import com.vce.vce._shared.exception.handler.CustomAccessDeniedHandler;
+import com.vce.vce._shared.exception.handler.AccessDeniedHandlerImpl;
 import com.vce.vce._shared.security.UserContextFilter;
 import com.vce.vce._shared.security.jwt.JwtAuthFilter;
 import com.vce.vce._shared.security.jwt.RestAuthenticationEntryPoint;
@@ -31,7 +31,7 @@ public class SecurityConfig {
     private final JwtAuthFilter jwtAuthFilter;
     private final CustomUserDetailsService customUserDetailsService;
     private final RestAuthenticationEntryPoint restAuthenticationEntryPoint;
-    private final CustomAccessDeniedHandler customAccessDeniedHandler;
+    private final AccessDeniedHandlerImpl accessDeniedHandlerImpl;
     private final UserContextFilter userContextFilter;
 
     @Bean
@@ -41,14 +41,14 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .cors(cors -> requestCorsConfiguration())
                 .authorizeHttpRequests(request -> request
-                        .requestMatchers("/api/auth/login", "/api/auth/register").permitAll()
+                        .requestMatchers("/api/auth/login", "/api/auth/register", "/api/auth/refresh").permitAll()
                         .anyRequest().authenticated())
                 .authenticationProvider(authenticationProvider())
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterAfter(userContextFilter, JwtAuthFilter.class)
                 .exceptionHandling(exception -> exception
                         .authenticationEntryPoint(restAuthenticationEntryPoint)
-                        .accessDeniedHandler(customAccessDeniedHandler))
+                        .accessDeniedHandler(accessDeniedHandlerImpl))
                 .build();
     }
 

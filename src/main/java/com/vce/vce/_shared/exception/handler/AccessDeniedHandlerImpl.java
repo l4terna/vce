@@ -1,6 +1,5 @@
 package com.vce.vce._shared.exception.handler;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vce.vce._shared.exception.ErrorResponse;
 import jakarta.servlet.ServletException;
@@ -15,7 +14,7 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 
 @Component
-public class CustomAccessDeniedHandler implements AccessDeniedHandler {
+public class AccessDeniedHandlerImpl implements AccessDeniedHandler {
 
     @Override
     public void handle(HttpServletRequest request, HttpServletResponse response, AccessDeniedException ex) throws IOException, ServletException {

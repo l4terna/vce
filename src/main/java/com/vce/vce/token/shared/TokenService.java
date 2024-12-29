@@ -48,6 +48,11 @@ public abstract class TokenService<T extends TokenEntity> {
         tokenRepository.revokeAllActiveTokensByUserSession(userSession);
     }
 
+    @Transactional
+    public void revokeActiveTokensByFingerprintAndUser(String fingerprint, User user) {
+        tokenRepository.revokeActiveTokensByFingerprintAndUser(fingerprint, user);
+    }
+
     public abstract boolean validateToken(String token, String fingerprint);
     protected abstract long getExpirationTime();
     protected abstract String generateToken(User user);

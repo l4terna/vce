@@ -7,6 +7,7 @@ import com.vce.vce.token.shared.dto.CreateTokenDTO;
 import com.vce.vce.user.User;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 
@@ -50,4 +51,6 @@ public class AccessTokenService extends TokenService<AccessToken> {
                 && token.getExpiresAt().isAfter(LocalDateTime.now())
                 && !token.getIsRevoked();
     }
+
+
 }
