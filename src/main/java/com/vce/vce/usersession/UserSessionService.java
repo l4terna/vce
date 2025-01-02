@@ -1,7 +1,6 @@
 package com.vce.vce.usersession;
 
 import com.vce.vce._shared.model.dto.PageableDTO;
-import com.vce.vce._shared.security.UserContextHolder;
 import com.vce.vce.token.access.AccessTokenService;
 import com.vce.vce.token.refresh.RefreshTokenService;
 import com.vce.vce.user.User;
@@ -13,7 +12,6 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -31,14 +29,14 @@ public class UserSessionService {
     private final UserSessionMapper userSessionMapper;
 
     @Transactional
-    public UserSession createUserSession(CreateUserSessionDTO createDTO) {
+    public UserSession createUserSession(CreateUserSessionDTO createDTO, String fingerprint) {
         UserSession session =  UserSession.builder()
                 .user(createDTO.user())
                 .lastActivity(LocalDateTime.now())
                 .deviceInfo(getDeviceInfo())
                 .lastActivity(LocalDateTime.now())
                 .ipAddress(getClientIpAddress())
-                .fingerprint(getFingerprint())
+                .fingerprint(fingerprint)
                 .build();
 
         return userSessionRepository.save(session);
@@ -85,13 +83,17 @@ public class UserSessionService {
         return httpServletRequest.getRemoteAddr();
     }
 
-    private String getFingerprint() {
-        Cookie cookie =  Arrays.stream(httpServletRequest.getCookies())
-                .filter(c -> c.getName().equals("fingerprint"))
-                .findFirst()
-                .orElseThrow(() -> new AccessDeniedException("Full authentication is required to access this resource"));
+    public String getFingerprint() {
+        if (httpServletRequest.getCookies() == null) {
+            return null;
+        }
 
-        return cookie.getValue();
+        Cookie cookie =  Arrays.stream(httpServletRequest.getCookies())
+                .filter(c -> c.getName().equals("__fprid"))
+                .findFirst()
+                .orElse(null);
+
+        return cookie == null ? null : cookie.getValue();
     }
 
     @Transactional
@@ -112,15 +114,9 @@ public class UserSessionService {
     }
 
     @Transactional(readOnly = true)
-    public Page<UserSessionDTO> getUserSessions(PageableDTO pageableDTO) {
-        return userSessionRepository.findAllAnotherActiveSessions(pageableDTO.toPageable(), UserContextHolder.getCurrentSession())
+    public Page<UserSessionDTO> getUserSessions(PageableDTO pageableDTO, User currentUser) {
+        return userSessionRepository.findAllAnotherActiveSessions(pageableDTO.toPageable(), findUserSessionByUser(currentUser))
                 .map(userSessionMapper::toDTO);
-    }
-
-    @Transactional(readOnly = true)
-    public UserSession findActiveByFingerprint(String fingerprint, User user) {
-        return userSessionRepository.findActiveByFingerprintAndUser(fingerprint, user)
-                .orElseThrow(() -> new EntityNotFoundException("Session not found"));
     }
 
     @Transactional
@@ -132,8 +128,15 @@ public class UserSessionService {
     }
 
     @Transactional
-    public void deactivateAllOtherUserSessions() {
-        UserSession userSession = UserContextHolder.getCurrentSession();
+    public void deactivateAllOtherUserSessions(User currentUser) {
+        UserSession userSession = findUserSessionByUser(currentUser);
         userSessionRepository.deactivateAllOtherSessions(userSession);
+    }
+
+    @Transactional(readOnly = true)
+    public UserSession findUserSessionByUser(User user) {
+        String fingerprint = getFingerprint();
+        return userSessionRepository.findActiveByFingerprintAndUser(fingerprint, user)
+                .orElseThrow(() -> new EntityNotFoundException("Session not found"));
     }
 }

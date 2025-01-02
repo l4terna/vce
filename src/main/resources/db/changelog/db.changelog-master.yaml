@@ -9,3 +9,9 @@ databaseChangeLog:
       file: db/changelog/changes/4_create_refresh_tokens.sql
   - include:
       file: db/changelog/changes/5_create_hubs.sql
+  - include:
+      file: db/changelog/changes/6_create_categories.sql
+  - include:
+      file: db/changelog/changes/7_create_members.sql
+  - include:
+      file: db/changelog/changes/8_create_invites.sql

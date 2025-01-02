@@ -22,7 +22,7 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ErrorResponse handleEntityNotFound(EntityNotFoundException ex) {
         return createErrorResponse(
-            ex.getMessage(),
+            "Not found",
             ex.getMessage(),
             HttpStatus.NOT_FOUND.value()
         );
@@ -32,7 +32,7 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.CONFLICT)
     public ErrorResponse handleEntityExists(EntityAlreadyExistsException ex) {
         return createErrorResponse(
-            ex.getMessage(),
+            "Already exists",
             ex.getMessage(),
             HttpStatus.CONFLICT.value()
         );

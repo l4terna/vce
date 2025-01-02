@@ -3,9 +3,11 @@ package com.vce.vce.hubs;
 import com.vce.vce._shared.model.dto.PageableDTO;
 import com.vce.vce.hubs.dto.CreateOrUpdateHubDTO;
 import com.vce.vce.hubs.dto.HubDTO;
+import com.vce.vce.user.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -13,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class HubController {
     private final HubService hubService;
+    private final HubCreationService hubCreationService;
 
     @GetMapping
     public ResponseEntity<Page<HubDTO>> getAllHubs(@ModelAttribute PageableDTO pageableDTO) {
@@ -20,8 +23,11 @@ public class HubController {
     }
 
     @PostMapping
-    public ResponseEntity<HubDTO> create(@RequestBody CreateOrUpdateHubDTO createHubDTO) {
-        return ResponseEntity.ok(hubService.create(createHubDTO));
+    public ResponseEntity<HubDTO> create(
+            @RequestBody CreateOrUpdateHubDTO createHubDTO,
+            @AuthenticationPrincipal User user
+    ) {
+        return ResponseEntity.ok(hubCreationService.create(createHubDTO, user));
     }
 
     @PutMapping("/{id}")
@@ -35,8 +41,11 @@ public class HubController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable Long id) {
-        hubService.delete(id);
+    public ResponseEntity<Void> delete(
+            @PathVariable Long id,
+            @AuthenticationPrincipal User user
+    ) {
+        hubService.delete(id, user);
         return ResponseEntity.noContent().build();
     }
 }

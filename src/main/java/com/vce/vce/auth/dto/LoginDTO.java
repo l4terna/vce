@@ -9,6 +9,9 @@ public record LoginDTO(
         String email,
 
         @NotBlank
-        String password
+        String password,
+
+        @NotBlank
+        String fingerprint
 ) {
 }

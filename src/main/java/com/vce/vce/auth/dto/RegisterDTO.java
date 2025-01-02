@@ -15,6 +15,9 @@ public record RegisterDTO(
 
         @NotBlank
         @Size(min = 6)
-        String password
+        String password,
+
+        @NotBlank
+        String fingerprint
 ) {
 }

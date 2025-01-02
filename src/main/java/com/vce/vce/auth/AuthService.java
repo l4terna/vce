@@ -22,6 +22,7 @@ import org.springframework.http.ResponseCookie;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.CookieValue;
 
 @Service
 @RequiredArgsConstructor
@@ -35,8 +36,9 @@ public class AuthService {
     private final JwtService jwtService;
 
     public AuthDTO register(RegisterDTO registerDTO, HttpServletResponse response) {
+        saveFingerprintCookie(response, registerDTO.fingerprint());
         User user = userService.createUser(registerDTO);
-        TokenDTO accessTokenDTO = createAuthenticationSession(user, response);
+        TokenDTO accessTokenDTO = createAuthenticationSession(user, registerDTO.fingerprint(), response);
 
         return AuthDTO.builder()
                 .user(userMapper.toDTO(user))
@@ -45,14 +47,15 @@ public class AuthService {
     }
 
     @Transactional
-    public AuthDTO login(LoginDTO loginDTO, String fingerprint, HttpServletResponse response) {
+    public AuthDTO login(LoginDTO loginDTO, HttpServletResponse response) {
         if (!userService.matchPassword(loginDTO.email(), loginDTO.password())) {
             throw new AccessDeniedException("Invalid email or password");
         }
 
+        saveFingerprintCookie(response, loginDTO.fingerprint());
         User user = userService.findByEmail(loginDTO.email());
-        userSessionService.deactivatePreviousSessions(user, fingerprint);
-        TokenDTO accessTokenDTO = createAuthenticationSession(user, response);
+        userSessionService.deactivatePreviousSessions(user, loginDTO.fingerprint());
+        TokenDTO accessTokenDTO = createAuthenticationSession(user, loginDTO.fingerprint(), response);
 
         return AuthDTO.builder()
                 .user(userMapper.toDTO(user))
@@ -60,11 +63,24 @@ public class AuthService {
                 .build();
     }
 
-    private TokenDTO createAuthenticationSession(User user, HttpServletResponse response) {
+    private void saveFingerprintCookie(HttpServletResponse response, String fingerprint) {
+        ResponseCookie fingerprintCookie = ResponseCookie.from("__fprid", fingerprint)
+                .httpOnly(true)
+                .secure(false)
+//                .partitioned(true)
+                .path("/")
+                .sameSite("Lax")
+                .maxAge(jwtService.getJwtRefreshExpiration())
+                .build();
+
+        response.addHeader(HttpHeaders.SET_COOKIE, fingerprintCookie.toString());
+    }
+
+    private TokenDTO createAuthenticationSession(User user, String fingerprint, HttpServletResponse response) {
         CreateUserSessionDTO createUserSessionDTO = CreateUserSessionDTO.builder()
                 .user(user)
                 .build();
-        UserSession userSession = userSessionService.createUserSession(createUserSessionDTO);
+        UserSession userSession = userSessionService.createUserSession(createUserSessionDTO, fingerprint);
 
         CreateTokenDTO createTokenDTO = CreateTokenDTO.builder()
                 .userSession(userSession)
@@ -76,11 +92,12 @@ public class AuthService {
         TokenDTO accessTokenDTO = accessTokenService.createToken(createTokenDTO);
         TokenDTO refreshTokenDTO = refreshTokenService.createToken(createTokenDTO);
 
-        ResponseCookie refreshTokenCookie = ResponseCookie.from("refresh_token", refreshTokenDTO.token())
+        ResponseCookie refreshTokenCookie = ResponseCookie.from("__rtid", refreshTokenDTO.token())
                 .httpOnly(true)
-                //.secure(true)
+                .secure(false)
+//                .partitioned(true)
                 .path("/api/auth")
-                .sameSite("Strict")
+                .sameSite("Lax")
                 .maxAge(jwtService.getJwtRefreshExpiration())
                 .build();
 
@@ -101,11 +118,12 @@ public class AuthService {
 
         userSessionService.deactivateSessionCompletely(refreshTokenEntity.getUserSession());
 
-        ResponseCookie refreshTokenCookie = ResponseCookie.from("refresh_token", "")
+        ResponseCookie refreshTokenCookie = ResponseCookie.from("__rtid", "")
                 .maxAge(0)
-                //.secure(true)
+                .secure(false)
+//                .partitioned(true)
                 .path("/api/auth")
-                .sameSite("Strict")
+                .sameSite("Lax")
                 .build();
 
         response.addHeader(HttpHeaders.SET_COOKIE, refreshTokenCookie.toString());

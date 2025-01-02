@@ -2,9 +2,9 @@ package com.vce.vce._shared.security.jwt;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vce.vce._shared.exception.ErrorResponse;
-import com.vce.vce._shared.security.SecurityUtils;
 import com.vce.vce.token.access.AccessTokenService;
 import com.vce.vce.user.CustomUserDetailsService;
+import com.vce.vce.usersession.UserSessionService;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
 import io.micrometer.common.util.StringUtils;
@@ -32,6 +32,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     private final CustomUserDetailsService customUserDetailsService;
     private final AccessTokenService accessTokenService;
     private final ObjectMapper objectMapper;
+    private final UserSessionService userSessionService;
 
     @Override
     protected void doFilterInternal(
@@ -41,7 +42,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     ) throws ServletException, IOException {
         try {
             String authHeader = request.getHeader("Authorization");
-            String fingerprint = SecurityUtils.getFingerprint(request);
+            String fingerprint = userSessionService.getFingerprint();
 
             if (StringUtils.isEmpty(authHeader) || !authHeader.startsWith("Bearer ") || fingerprint == null) {
                 filterChain.doFilter(request, response);
