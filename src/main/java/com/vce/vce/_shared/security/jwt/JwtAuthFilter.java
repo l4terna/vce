@@ -44,6 +44,13 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             String authHeader = request.getHeader("Authorization");
             String fingerprint = userSessionService.getFingerprint();
 
+            if (request.getRequestURI().contains("/auth/login") ||
+                    request.getRequestURI().contains("/auth/register") ||
+                    request.getRequestURI().contains("/auth/refresh")) {
+                filterChain.doFilter(request, response);
+                return;
+            }
+
             if (StringUtils.isEmpty(authHeader) || !authHeader.startsWith("Bearer ") || fingerprint == null) {
                 filterChain.doFilter(request, response);
                 return;
@@ -94,18 +101,17 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         response.setContentType("application/json");
         response.setStatus(HttpStatus.UNAUTHORIZED.value());
 
-        String message = ex.getMessage();
-        String type = "Authentication failed";
+        String message = "Invalid credentials";
 
         if (ex instanceof ExpiredJwtException) {
-            type = "Token Expired";
+            message = ex.getMessage();
         } else if (ex instanceof JwtException) {
-            type = "Invalid Token";
+            message = ex.getMessage();
         }
 
         ErrorResponse error = ErrorResponse.builder()
                 .message(message)
-                .type(type)
+                .type("Unauthorized")
                 .statusCode(HttpStatus.UNAUTHORIZED.value())
                 .timestamp(LocalDateTime.now())
                 .path(request.getRequestURI())

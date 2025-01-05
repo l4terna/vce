@@ -120,10 +120,14 @@ public class UserSessionService {
     }
 
     @Transactional
-    public void deactivateSession(Long id) {
+    public void deactivateSession(Long id, String fingerprint, User currentUser) {
         UserSession userSession = userSessionRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Session not found"));
         userSession.setIsActive(false);
+
+        accessTokenService.revokeActiveTokensByFingerprintAndUser(fingerprint, currentUser);
+        refreshTokenService.revokeActiveTokensByFingerprintAndUser(fingerprint, currentUser);
+
         userSessionRepository.save(userSession);
     }
 

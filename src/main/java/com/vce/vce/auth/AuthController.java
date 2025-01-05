@@ -34,7 +34,7 @@ public class AuthController {
     @PostMapping("/refresh")
     public ResponseEntity<AuthDTO> refresh(
             @CookieValue(name = "__rtid") String refreshToken,
-            @CookieValue String fingerprint
+            @CookieValue("__fprid") String fingerprint
     ) {
         return ResponseEntity.ok(authService.refreshToken(refreshToken, fingerprint));
     }
@@ -42,7 +42,7 @@ public class AuthController {
     @PostMapping("/logout")
     public ResponseEntity<Void> logout(
             @CookieValue(name = "__rtid") String refreshToken,
-            @CookieValue String fingerprint,
+            @CookieValue("__fprid") String fingerprint,
             HttpServletResponse response
     ) {
         authService.logout(refreshToken, fingerprint, response);

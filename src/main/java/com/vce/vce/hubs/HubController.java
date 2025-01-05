@@ -1,9 +1,11 @@
 package com.vce.vce.hubs;
 
 import com.vce.vce._shared.model.dto.PageableDTO;
-import com.vce.vce.hubs.dto.CreateOrUpdateHubDTO;
+import com.vce.vce.hubs.dto.CreateHubDTO;
 import com.vce.vce.hubs.dto.HubDTO;
+import com.vce.vce.hubs.dto.UpdateHubDTO;
 import com.vce.vce.user.User;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
@@ -24,15 +26,19 @@ public class HubController {
 
     @PostMapping
     public ResponseEntity<HubDTO> create(
-            @RequestBody CreateOrUpdateHubDTO createHubDTO,
+            @Valid @RequestBody CreateHubDTO createHubDTO,
             @AuthenticationPrincipal User user
     ) {
         return ResponseEntity.ok(hubCreationService.create(createHubDTO, user));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<HubDTO> update(@RequestBody CreateOrUpdateHubDTO updateHubDTO, @PathVariable Long id) {
-        return ResponseEntity.ok(hubService.update(id, updateHubDTO));
+    public ResponseEntity<HubDTO> update(
+            @RequestBody UpdateHubDTO updateHubDTO,
+            @PathVariable Long id,
+            @AuthenticationPrincipal User user
+    ) {
+        return ResponseEntity.ok(hubService.update(id, updateHubDTO, user));
     }
 
     @GetMapping("/{id}")

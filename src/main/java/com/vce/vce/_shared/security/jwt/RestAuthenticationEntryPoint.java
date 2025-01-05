@@ -30,8 +30,8 @@ public class RestAuthenticationEntryPoint implements AuthenticationEntryPoint {
        
        ErrorResponse errorResponse = ErrorResponse.builder()
            .statusCode(HttpStatus.UNAUTHORIZED.value())
-           .message(ex.getMessage())
-           .type("Authentication failed")
+           .message("Invalid credentials")
+           .type("Unauthorized")
            .path(request.getRequestURI())
            .timestamp(LocalDateTime.now())
            .build();

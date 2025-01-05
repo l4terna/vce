@@ -6,7 +6,9 @@ import com.vce.vce.hubs.HubService;
 import com.vce.vce.invite.dto.AcceptInviteDTO;
 import com.vce.vce.invite.dto.CreateInviteDTO;
 import com.vce.vce.invite.dto.InviteDTO;
-import com.vce.vce.member.MemberService;
+import com.vce.vce.member.MemberCreationService;
+import com.vce.vce.permission.PermissionService;
+import com.vce.vce.permission.enumeration.Permission;
 import com.vce.vce.user.User;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -28,15 +30,14 @@ public class InviteService {
 
     private static final String CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqstuvwxyz0123456789";
     private static final int CODE_LENGTH = 10;
-    private final MemberService memberService;
+    private final MemberCreationService memberCreationService;
+    private final PermissionService permissionService;
 
     @Transactional
     public InviteDTO create(Long hubId, CreateInviteDTO createInviteDTO, User currentUser) {
         Hub hub = hubService.findHubById(hubId);
 
-        if (!hub.getOwner().getId().equals(currentUser.getId())) {
-            throw new AccessDeniedException("Insufficient rights");
-        }
+        permissionService.hasPermissionsThrow(currentUser.getId(), hubId, Permission.CREATE_INVITE);
 
         LocalDateTime expiresAt = createInviteDTO.expiresAt();
 
@@ -77,7 +78,7 @@ public class InviteService {
             throw new AccessDeniedException("Code expired");
         }
 
-        memberService.createMember(hubId, user);
+        memberCreationService.createMember(hubId, user);
 
         invite.setCurrentUses(invite.getCurrentUses() + 1);
         inviteRepository.save(invite);
@@ -93,7 +94,7 @@ public class InviteService {
     public void delete(Long hubId, Long inviteId, User currentUser) {
         Hub hub = hubService.findHubById(hubId);
         if (!hub.getOwner().getId().equals(currentUser.getId())) {
-            throw new AccessDeniedException("Insufficient rights");
+            throw new AccessDeniedException("Insufficient permissions");
         }
 
         inviteRepository.deleteById(inviteId);

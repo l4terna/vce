@@ -15,3 +15,7 @@ databaseChangeLog:
       file: db/changelog/changes/7_create_members.sql
   - include:
       file: db/changelog/changes/8_create_invites.sql
+  - include:
+      file: db/changelog/changes/9_create_roles.sql
+  - include:
+      file: db/changelog/changes/10_members_roles.sql

@@ -1,8 +1,10 @@
 package com.vce.vce.hubs;
 
 import com.vce.vce._shared.model.dto.PageableDTO;
-import com.vce.vce.hubs.dto.CreateOrUpdateHubDTO;
 import com.vce.vce.hubs.dto.HubDTO;
+import com.vce.vce.hubs.dto.UpdateHubDTO;
+import com.vce.vce.permission.PermissionService;
+import com.vce.vce.permission.enumeration.Permission;
 import com.vce.vce.user.User;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -17,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class HubService {
     private final HubMapper hubMapper;
     private final HubRepository hubRepository;
+    private final PermissionService permissionService;
 
     @Transactional(readOnly = true)
     public Page<HubDTO> getAllHubs(PageableDTO pageableDTO) {
@@ -25,11 +28,16 @@ public class HubService {
     }
 
     @Transactional
-    public HubDTO update(Long id, CreateOrUpdateHubDTO updateHubDTO) {
+    public HubDTO update(Long id, UpdateHubDTO updateHubDTO, User currentUser) {
         Hub hub = hubRepository.findById(id).
                 orElseThrow(() -> new EntityNotFoundException("Hub not found"));
 
-        hub.setName(updateHubDTO.name());
+        permissionService.hasPermissionsThrow(currentUser.getId(), id, Permission.MANAGE_HUB);
+
+        if (updateHubDTO.name() != null && !updateHubDTO.name().equals(hub.getName())) {
+            hub.setName(updateHubDTO.name());
+        }
+
         hubRepository.save(hub);
 
         return hubMapper.toDTO(hub);
@@ -53,7 +61,7 @@ public class HubService {
         Hub hub = findHubById(id);
 
         if (!hub.getOwner().getId().equals(currentUser.getId())) {
-            throw new AccessDeniedException("Insufficient rights");
+            throw new AccessDeniedException("Insufficient permissions");
         }
 
         hubRepository.deleteById(id);

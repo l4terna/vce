@@ -5,6 +5,8 @@ import com.vce.vce.category.dto.CreateCategoryDTO;
 import com.vce.vce.category.dto.UpdateCategoryDTO;
 import com.vce.vce.hubs.Hub;
 import com.vce.vce.hubs.HubService;
+import com.vce.vce.permission.PermissionService;
+import com.vce.vce.permission.enumeration.Permission;
 import com.vce.vce.user.User;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +22,7 @@ public class CategoryService {
     private final CategoryRepository categoryRepository;
     private final CategoryMapper categoryMapper;
     private final HubService hubService;
+    private final PermissionService permissionService;
 
     @Transactional(readOnly = true)
     public List<CategoryDTO> getAllCategories(Long hubId) {
@@ -35,9 +38,11 @@ public class CategoryService {
     }
 
     @Transactional
-    public CategoryDTO create(Long hubId, CreateCategoryDTO createCategoryDTO) {
+    public CategoryDTO create(Long hubId, CreateCategoryDTO createCategoryDTO, User currentUser) {
         int lastPosition = getLastPosition(hubId);
         Hub hub = hubService.findHubById(hubId);
+
+        permissionService.hasPermissionsThrow(currentUser.getId(), hubId, Permission.MANAGE_CATEGORIES);
 
         Category newCategory = Category.builder()
                 .position(lastPosition)
@@ -49,9 +54,11 @@ public class CategoryService {
     }
 
     @Transactional
-    public CategoryDTO update(Long hubId, Long categoryId, UpdateCategoryDTO updateCategoryDTO) {
+    public CategoryDTO update(Long hubId, Long categoryId, UpdateCategoryDTO updateCategoryDTO, User currentUser) {
         Category category = categoryRepository.findById(categoryId)
                 .orElseThrow(() -> new EntityNotFoundException("Category not found"));
+
+        permissionService.hasPermissionsThrow(currentUser.getId(), hubId, Permission.MANAGE_CATEGORIES);
 
         if (updateCategoryDTO.position() != null && !updateCategoryDTO.position().equals(category.getPosition())) {
             int lastPosition = getLastPosition(hubId);
@@ -92,7 +99,7 @@ public class CategoryService {
         }
 
         if(!category.getHub().getOwner().getId().equals(currentUser.getId())) {
-            throw new AccessDeniedException("Insufficient rights");
+            throw new AccessDeniedException("Insufficient permissions");
         }
 
         categoryRepository.deleteById(categoryId);

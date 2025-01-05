@@ -6,6 +6,7 @@ import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -35,6 +36,16 @@ public class GlobalExceptionHandler {
             "Already exists",
             ex.getMessage(),
             HttpStatus.CONFLICT.value()
+        );
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    public ErrorResponse handleAccessDenied(AccessDeniedException ex) {
+        return createErrorResponse(
+                "Access denied",
+                ex.getMessage(),
+                HttpStatus.FORBIDDEN.value()
         );
     }
 

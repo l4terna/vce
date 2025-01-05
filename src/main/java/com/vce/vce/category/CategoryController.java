@@ -4,6 +4,7 @@ import com.vce.vce.category.dto.CategoryDTO;
 import com.vce.vce.category.dto.CreateCategoryDTO;
 import com.vce.vce.category.dto.UpdateCategoryDTO;
 import com.vce.vce.user.User;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -25,18 +26,20 @@ public class CategoryController {
     @PostMapping
     public ResponseEntity<CategoryDTO> createCategory(
             @PathVariable Long hubId,
-            @RequestBody CreateCategoryDTO createCategoryDTO
+            @Valid @RequestBody CreateCategoryDTO createCategoryDTO,
+            @AuthenticationPrincipal User user
     ) {
-        return ResponseEntity.ok(categoryService.create(hubId, createCategoryDTO));
+        return ResponseEntity.ok(categoryService.create(hubId, createCategoryDTO, user));
     }
 
     @PutMapping("/{categoryId}")
     public ResponseEntity<CategoryDTO> updateCategory(
             @PathVariable Long hubId,
             @PathVariable Long categoryId,
-            @RequestBody UpdateCategoryDTO updateCategoryDTO
+            @RequestBody UpdateCategoryDTO updateCategoryDTO,
+            @AuthenticationPrincipal User user
     ) {
-        return ResponseEntity.ok(categoryService.update(hubId, categoryId, updateCategoryDTO));
+        return ResponseEntity.ok(categoryService.update(hubId, categoryId, updateCategoryDTO, user));
     }
 
     @DeleteMapping("/{categoryId}")

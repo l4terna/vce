@@ -14,4 +14,8 @@ interface MemberRepository extends JpaRepository<Member, Long> {
     Page<Member> findAllByHubId(Long hubId, Pageable pageable);
 
     Optional<Member> findByHubAndUser(Hub hub, User user);
+
+    Optional<Member> findByUserId(Long userId);
+
+    Optional<Member> findByUserIdAndHubId(Long userId, Long hubId);
 }

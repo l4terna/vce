@@ -5,6 +5,7 @@ import com.vce.vce.invite.dto.AcceptInviteDTO;
 import com.vce.vce.invite.dto.CreateInviteDTO;
 import com.vce.vce.invite.dto.InviteDTO;
 import com.vce.vce.user.User;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
@@ -28,7 +29,7 @@ public class InviteController {
     @PostMapping
     public ResponseEntity<InviteDTO> createInvite(
             @PathVariable Long hubId,
-            @RequestBody CreateInviteDTO createInviteDTO,
+            @Valid @RequestBody CreateInviteDTO createInviteDTO,
             @AuthenticationPrincipal User user
     ) {
         return ResponseEntity.ok(inviteService.create(hubId, createInviteDTO, user));
