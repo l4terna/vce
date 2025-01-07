@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Websocket Chat</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+            background-color: #1e1e1e;
+            color: #ffffff;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            margin-bottom: 30px;
+            font-size: 24px;
+            font-weight: normal;
+        }
+
+        .login-section {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-bottom: 30px;
+        }
+
+        .message-section {
+            margin-bottom: 30px;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        input {
+            background-color: #2d2d2d;
+            border: 1px solid #3d3d3d;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 4px;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #4d4d4d;
+        }
+
+        .send-message input {
+            flex: 1;
+        }
+
+        button {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .login-button {
+            background-color: #0d6efd;
+            color: white;
+        }
+
+        .send-button {
+            background-color: #ffc107;
+            color: black;
+        }
+
+        .messages-container {
+            background-color: #2d2d2d;
+            border-radius: 4px;
+            padding: 20px;
+        }
+
+        .messages-header {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            font-weight: bold;
+            margin-bottom: 10px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #3d3d3d;
+        }
+
+        .message-row {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            padding: 8px 0;
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>Websocket Chat</h1>
+
+    <div class="login-section" id="loginSection">
+        <input type="text" id="username" placeholder="username">
+        <input type="password" id="password" placeholder="password">
+        <button class="login-button" onclick="login()">Login</button>
+    </div>
+
+    <div class="message-section hidden" id="messageSection">
+        <h2>Send Message</h2>
+        <div class="channel-input">
+            <input type="text" id="channelId" placeholder="Channel ID">
+            <button onclick="subscribeToChannel()">Subscribe</button>
+        </div>
+        <div class="input-group send-message">
+            <input type="text" id="messageInput" placeholder="Message">
+            <button class="send-button" onclick="sendMessage()">SEND</button>
+        </div>
+
+        <h2>Messages</h2>
+        <div class="messages-container">
+            <div class="messages-header">
+                <div>Message</div>
+                <div>From</div>
+            </div>
+            <div id="messagesContent"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let ws = null;
+    let authToken = null;
+    let currentChannelId = null;
+
+    async function login() {
+        const username = document.getElementById('username').value;
+        const password = document.getElementById('password').value;
+
+        try {
+            const response = await fetch('http://localhost:8080/api/v1/auth/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    email: username,
+                    password: password,
+                    fingerprint: 'browser-' + Math.random().toString(36).substring(7)
+                })
+            });
+
+            if (!response.ok) {
+                throw new Error('Login failed');
+            }
+
+            const data = await response.json();
+            authToken = data.token.token;
+
+            document.getElementById('loginSection').classList.add('hidden');
+            document.getElementById('messageSection').classList.remove('hidden');
+            connect();
+        } catch (error) {
+            alert('Login failed: ' + error.message);
+        }
+    }
+
+    function connect() {
+        ws = new WebSocket('ws://localhost:8080/ws');
+
+        ws.onopen = () => {
+            console.log('Connected to WebSocket');
+            // Отправляем команду авторизации
+            sendPacket('AUTH', {
+                token: authToken
+            });
+        };
+
+        ws.onmessage = (event) => {
+            const packet = JSON.parse(event.data);
+            handlePacket(packet);
+        };
+
+        ws.onerror = (error) => {
+            console.error('WebSocket error:', error);
+        };
+
+        ws.onclose = () => {
+            console.log('WebSocket connection closed');
+        };
+    }
+
+    function sendPacket(command, data) {
+        if (ws && ws.readyState === WebSocket.OPEN) {
+            const packet = {
+                c: command,
+                d: data
+            };
+            ws.send(JSON.stringify(packet));
+        } else {
+            console.error('WebSocket is not connected');
+        }
+    }
+
+    function handlePacket(packet) {
+        switch (packet.c) {
+            case 'AUTH_SUCCESS':
+                console.log('Successfully authenticated');
+                break;
+            case 'AUTH_ERROR':
+                console.error('Authentication failed:', packet.d.message);
+                break;
+            case 'CHANNEL_SUBSCRIBED':
+                console.log('Subscribed to channel:', packet.d.channelId);
+                break;
+            case 'MESSAGE':
+                showMessage(packet.d);
+                break;
+            case 'ERROR':
+                console.error('Error:', packet.d.message);
+                break;
+            default:
+                console.log('Unknown command:', packet.c);
+        }
+    }
+
+    function subscribeToChannel() {
+        const channelId = document.getElementById('channelId').value;
+        if (!channelId) {
+            alert('Please enter a channel ID');
+            return;
+        }
+
+        currentChannelId = channelId;
+        sendPacket('SUBSCRIBE', {
+            channelId: channelId
+        });
+    }
+
+    function sendMessage() {
+        if (!currentChannelId) {
+            alert('Please subscribe to a channel first');
+            return;
+        }
+
+        const message = document.getElementById('messageInput').value;
+        if (message) {
+            sendPacket('MESSAGE', {
+                channelId: currentChannelId,
+                content: message
+            });
+            document.getElementById('messageInput').value = '';
+        }
+    }
+
+    function showMessage(message) {
+        const messagesContent = document.getElementById('messagesContent');
+        const messageRow = document.createElement('div');
+        messageRow.classList.add('message-row');
+        messageRow.innerHTML = `
+            <div>${message.content}</div>
+            <div>${message.username || 'Anonymous'}</div>
+        `;
+        messagesContent.appendChild(messageRow);
+    }
+
+    // Handle Enter key in message input
+    document.getElementById('messageInput').addEventListener('keypress', function(event) {
+        if (event.key === 'Enter') {
+            sendMessage();
+        }
+    });
+</script>
+</body>
+</html>

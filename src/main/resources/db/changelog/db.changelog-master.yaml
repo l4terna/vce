@@ -4,18 +4,22 @@ databaseChangeLog:
   - include:
       file: db/changelog/changes/2_create_uses_sessions.sql
   - include:
-      file: db/changelog/changes/3_create_access_tokens.sql
-  - include:
-      file: db/changelog/changes/4_create_refresh_tokens.sql
+      file: db/changelog/changes/3_create_tokens.sql
   - include:
       file: db/changelog/changes/5_create_hubs.sql
   - include:
       file: db/changelog/changes/6_create_categories.sql
   - include:
-      file: db/changelog/changes/7_create_members.sql
+      file: db/changelog/changes/7_create_hub_members.sql
   - include:
       file: db/changelog/changes/8_create_invites.sql
   - include:
       file: db/changelog/changes/9_create_roles.sql
   - include:
-      file: db/changelog/changes/10_members_roles.sql
+      file: db/changelog/changes/10_create_hub_member_roles.sql
+  - include:
+      file: db/changelog/changes/11_create_channels.sql
+  - include:
+      file: db/changelog/changes/12_create_channel_members.sql
+  - include:
+      file: db/changelog/changes/13_create_messages.sql
