@@ -29,11 +29,12 @@ public class MessageService {
     @Transactional
     public MessageDTO create(Long channelId, CreateMessageDTO createMessageDTO, User currentUser) {
         Channel channel = channelService.findChannelById(channelId);
-        Hub hub = hubService.findHubById(currentUser.getId());
 
         if (channel.getType() == ChannelType.VOICE || channel.getType() == ChannelType.TEXT) {
+            Hub hub = hubService.findHubById(currentUser.getId());
             permissionService.hasPermissionsThrow(currentUser.getId(), hub.getId(), Permission.SEND_MESSAGES);
         }
+
 
         Message message = Message.builder()
                 .content(createMessageDTO.content())

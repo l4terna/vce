@@ -3,7 +3,7 @@ package com.vce.vce.v1._shared.config;
 import com.vce.vce.v1._shared.exception.handler.AccessDeniedHandlerImpl;
 import com.vce.vce.v1._shared.security.jwt.JwtAuthFilter;
 import com.vce.vce.v1._shared.security.jwt.RestAuthenticationEntryPoint;
-import com.vce.vce.v1.user.CustomUserDetailsService;
+import com.vce.vce.v1.user.UserDetailsServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -30,7 +30,7 @@ import java.util.Arrays;
 @RequiredArgsConstructor
 public class SecurityConfig {
     private final JwtAuthFilter jwtAuthFilter;
-    private final CustomUserDetailsService customUserDetailsService;
+    private final UserDetailsServiceImpl userDetailsServiceImpl;
     private final RestAuthenticationEntryPoint restAuthenticationEntryPoint;
     private final AccessDeniedHandlerImpl accessDeniedHandlerImpl;
 
@@ -97,7 +97,7 @@ public class SecurityConfig {
     @Bean
     public AuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
-        authProvider.setUserDetailsService(customUserDetailsService);
+        authProvider.setUserDetailsService(userDetailsServiceImpl);
         authProvider.setPasswordEncoder(passwordEncoder());
         return authProvider;
     }

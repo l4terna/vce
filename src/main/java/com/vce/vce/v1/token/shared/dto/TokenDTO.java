@@ -8,8 +8,6 @@ import java.time.LocalDateTime;
 public record TokenDTO(
         Long id,
         String token,
-        LocalDateTime expiresAt,
-        Boolean isRevoked,
-        LocalDateTime createdAt
+        LocalDateTime expiresAt
 ) {
 }

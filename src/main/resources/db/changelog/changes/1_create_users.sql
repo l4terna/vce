@@ -1,4 +1,4 @@
--- liquibase formatted
+-- liquibase formatted sql
 
 -- changeset laterna:1
 CREATE TABLE users(

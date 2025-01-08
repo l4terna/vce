@@ -3,7 +3,7 @@ package com.vce.vce.v1._shared.security.jwt;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vce.vce.v1._shared.exception.ErrorResponse;
 import com.vce.vce.v1.token.access.AccessTokenService;
-import com.vce.vce.v1.user.CustomUserDetailsService;
+import com.vce.vce.v1.user.UserDetailsServiceImpl;
 import com.vce.vce.v1.usersession.UserSessionService;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
@@ -15,7 +15,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
@@ -29,7 +28,7 @@ import java.time.LocalDateTime;
 @RequiredArgsConstructor
 public class JwtAuthFilter extends OncePerRequestFilter {
     private final JwtService jwtService;
-    private final CustomUserDetailsService customUserDetailsService;
+    private final UserDetailsServiceImpl userDetailsServiceImpl;
     private final AccessTokenService accessTokenService;
     private final ObjectMapper objectMapper;
     private final UserSessionService userSessionService;
@@ -46,8 +45,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
             if (request.getRequestURI().contains("/auth/login") ||
                     request.getRequestURI().contains("/auth/register") ||
-                    request.getRequestURI().contains("/auth/refresh") ||
-                    request.getRequestURI().contains("/ws")) {
+                    request.getRequestURI().contains("/auth/refresh")) {
                 filterChain.doFilter(request, response);
                 return;
             }
@@ -70,7 +68,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                     throw new JwtException("Token validation failed");
                 }
 
-                UserDetails userDetails = customUserDetailsService.loadUserByUsername(username);
+                UserDetails userDetails = userDetailsServiceImpl.loadUserByUsername(username);
 
                 UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
                         userDetails,
