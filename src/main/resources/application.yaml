@@ -1,6 +1,6 @@
 spring:
   application:
-    name: vce
+    name: flux
 
   datasource:
     driver-class-name: org.postgresql.Driver
@@ -18,9 +18,3 @@ jwt:
     expiration: 86400
   refresh:
     expiration: 86400
-
-management:
-  endpoints:
-    web:
-      exposure:
-        include: metrics

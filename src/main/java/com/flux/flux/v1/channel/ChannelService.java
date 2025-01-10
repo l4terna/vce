@@ -4,7 +4,7 @@ import com.flux.flux.v1.category.Category;
 import com.flux.flux.v1.category.CategoryService;
 import com.flux.flux.v1.channel.dto.ChannelDTO;
 import com.flux.flux.v1.channel.dto.UpdateChannelDTO;
-import com.vce.vce.v1.channel.dto.*;
+import com.flux.flux.v1.channel.dto.*;
 import com.flux.flux.v1.channel.enumeration.ChannelType;
 import com.flux.flux.v1.hubs.Hub;
 import com.flux.flux.v1.hubs.HubService;

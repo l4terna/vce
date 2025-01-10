@@ -1,0 +1,39 @@
+version: '3.8'
+
+services:
+  app:
+    container_name: spring-app
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    ports:
+      - "8085:8080"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://database:5432/flux?reWriteBatchedInserts=true
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=postgres
+    depends_on:
+      - database
+    networks:
+      - spring
+
+  database:
+    container_name: postgres
+    image: postgres:16-alpine
+    ports:
+      - "5433:5432"
+    environment:
+      - POSTGRES_DB=flux
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    networks:
+      - spring
+
+networks:
+  spring:
+    driver: bridge
+
+volumes:
+  postgres-data:
