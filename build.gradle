@@ -5,8 +5,8 @@ plugins {
     id 'org.liquibase.gradle' version '2.2.0'
 }
 
-group = 'com.vce'
-version = '0.0.1-SNAPSHOT'
+group = 'com.flux'
+version = '0.0.1'
 
 java {
     toolchain {
