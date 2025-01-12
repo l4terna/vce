@@ -24,6 +24,14 @@ public class HubController {
         return ResponseEntity.ok(hubService.getAllHubs(pageableDTO));
     }
 
+    @GetMapping("/@me")
+    public ResponseEntity<Page<HubDTO>> getAllUserHubs(
+            @ModelAttribute PageableDTO pageableDTO,
+            @AuthenticationPrincipal User user
+    ) {
+        return ResponseEntity.ok(hubService.getAllUserHubs(pageableDTO, user));
+    }
+
     @PostMapping
     public ResponseEntity<HubDTO> create(
             @Valid @RequestBody CreateHubDTO createHubDTO,

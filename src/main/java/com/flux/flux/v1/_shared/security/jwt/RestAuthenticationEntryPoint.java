@@ -23,11 +23,11 @@ public class RestAuthenticationEntryPoint implements AuthenticationEntryPoint {
    public void commence(HttpServletRequest request,
                         HttpServletResponse response,
                         AuthenticationException ex) throws IOException {
-       
+
        response.setStatus(HttpStatus.UNAUTHORIZED.value());
        response.setContentType("application/json");
        response.setCharacterEncoding("UTF-8");
-       
+
        ErrorResponse errorResponse = ErrorResponse.builder()
            .statusCode(HttpStatus.UNAUTHORIZED.value())
            .message("Invalid credentials")

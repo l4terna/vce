@@ -14,9 +14,21 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class HubMemberController {
     private final HubMemberService hubMemberService;
+    private final HubMemberCreationService hubMemberCreationService;
+
+    @PostMapping
+    public ResponseEntity<HubMemberDTO> create(
+            @PathVariable Long hubId,
+            @AuthenticationPrincipal User user
+    ) {
+        return ResponseEntity.ok(hubMemberCreationService.create(hubId, user));
+    }
 
     @GetMapping
-    public ResponseEntity<Page<HubMemberDTO>> getMembers(@PathVariable Long hubId, @ModelAttribute PageableDTO pageableDTO) {
+    public ResponseEntity<Page<HubMemberDTO>> getMembers(
+            @PathVariable Long hubId,
+            @ModelAttribute PageableDTO pageableDTO
+    ) {
         return ResponseEntity.ok(hubMemberService.getAllMembers(hubId, pageableDTO));
     }
 

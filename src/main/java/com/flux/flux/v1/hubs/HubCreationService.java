@@ -20,11 +20,12 @@ public class HubCreationService {
         Hub hub = Hub.builder()
                 .name(createHubDTO.name())
                 .owner(currentUser)
+                .type(createHubDTO.type())
                 .build();
 
         Hub savedHub = hubRepository.save(hub);
 
-        hubMemberCreationService.createMember(savedHub, currentUser);
+        hubMemberCreationService.create(savedHub, currentUser);
 
         return hubMapper.toDTO(savedHub);
     }

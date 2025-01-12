@@ -5,10 +5,9 @@ import com.flux.flux.v1.role.dto.CreateRoleDTO;
 import com.flux.flux.v1.role.dto.RoleDTO;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.Set;
 
 @RestController
 @RequestMapping("/api/v1/hubs/{hubId}/roles")
@@ -18,7 +17,7 @@ public class RoleController {
     private final RoleService roleService;
 
     @GetMapping
-    public ResponseEntity<Set<RoleDTO>> getRoles(
+    public ResponseEntity<Page<RoleDTO>> getRoles(
             @PathVariable Long hubId,
             @ModelAttribute PageableDTO pageableDTO
     ) {
@@ -26,8 +25,8 @@ public class RoleController {
     }
 
     @PostMapping
-    public ResponseEntity<RoleDTO> createRole(
-            @PathVariable("hubId") Long hubId,
+    public ResponseEntity<RoleDTO> create(
+            @PathVariable Long hubId,
             @Valid @RequestBody CreateRoleDTO createRoleDTO
     ) {
         return ResponseEntity.ok(roleCreationService.create(hubId, createRoleDTO));

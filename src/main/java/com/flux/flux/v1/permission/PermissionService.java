@@ -21,7 +21,7 @@ public class PermissionService {
 
     @Transactional(readOnly = true)
     public boolean hasPermissions(Long userId, Long hubId, Permission... permissions) {
-        HubMember hubMember = hubMemberService.findByHubIdAndUserId(hubId, userId);
+        HubMember hubMember = hubMemberService.findMemberByHubIdAndUserId(hubId, userId);
 
         if (hubMember.getHub().getOwner().getId().equals(userId)) {
             return true;

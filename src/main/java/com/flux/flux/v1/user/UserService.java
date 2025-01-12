@@ -2,7 +2,11 @@ package com.flux.flux.v1.user;
 
 import com.flux.flux.v1._shared.exception.EntityAlreadyExistsException;
 import com.flux.flux.v1.auth.dto.RegisterDTO;
+import com.flux.flux.v1.hubmember.HubMemberService;
+import com.flux.flux.v1.hubmember.dto.HubMemberDTO;
+import com.flux.flux.v1.user.dto.GetUserFilter;
 import com.flux.flux.v1.user.dto.UserDTO;
+import com.flux.flux.v1.user.dto.UserProfileDTO;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.constraints.NotEmpty;
 import lombok.RequiredArgsConstructor;
@@ -18,6 +22,7 @@ public class UserService {
     private final UserMapper userMapper;
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final HubMemberService hubMemberService;
 
     @Transactional(readOnly = true)
     public User findByEmail(String email) {
@@ -54,12 +59,35 @@ public class UserService {
     }
 
     @Transactional(readOnly = true)
-    public User findById(Long id) {
+    public User findUserById(Long id) {
         return userRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("User not found"));
     }
 
+    @Transactional(readOnly = true)
     public List<User> findAllByIds(@NotEmpty List<Long> users) {
         return userRepository.findAllById(users);
+    }
+
+    public UserDTO getMe(User user) {
+        return userMapper.toDTO(user);
+    }
+
+    @Transactional(readOnly = true)
+    public UserProfileDTO getProfile(Long id, GetUserFilter filter) {
+        HubMemberDTO hubMemberDTO = null;
+
+        UserDTO userDTO = userRepository.findById(id)
+                .map(userMapper::toDTO)
+                .orElseThrow(() -> new EntityNotFoundException("User not found"));
+
+        if (filter.getHubId() != null) {
+            hubMemberDTO = hubMemberService.findByHubIdAndUserId(filter.getHubId(), userDTO.id());
+        }
+
+        return UserProfileDTO.builder()
+                .user(userDTO)
+                .hubMember(hubMemberDTO)
+                .build();
     }
 }

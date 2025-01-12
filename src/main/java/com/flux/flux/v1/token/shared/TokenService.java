@@ -1,7 +1,6 @@
 package com.flux.flux.v1.token.shared;
 
 import com.flux.flux.v1.token.shared.dto.CreateTokenDTO;
-import com.flux.flux.v1.token.shared.dto.TokenDTO;
 import com.flux.flux.v1.user.User;
 import com.flux.flux.v1.usersession.UserSession;
 import org.springframework.stereotype.Service;
@@ -22,7 +21,7 @@ public abstract class TokenService<T extends Token> {
     }
 
     @Transactional
-    public TokenDTO createToken(CreateTokenDTO createDTO) {
+    public Token createToken(CreateTokenDTO createDTO) {
         String jwtToken = generateToken(createDTO.user());
 
         LocalDateTime expiresAt = LocalDateTime.ofInstant(
@@ -39,7 +38,7 @@ public abstract class TokenService<T extends Token> {
                 expiresAt
         );
 
-        return tokenMapper.toDTO(tokenRepository.save(token));
+        return tokenRepository.save(token);
     }
 
     @Transactional

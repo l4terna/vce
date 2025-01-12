@@ -42,8 +42,8 @@ public class RefreshTokenService extends TokenService<RefreshToken> {
     }
 
     @Override
-    public boolean validateToken(String accessToken, String fingerprint) {
-        RefreshToken token = tokenRepository.findByToken(accessToken)
+    public boolean validateToken(String refreshToken, String fingerprint) {
+        RefreshToken token = tokenRepository.findByToken(refreshToken)
                 .orElseThrow(() -> new EntityNotFoundException("Token not found"));
 
         return token.getUserSession().getFingerprint().equals(fingerprint)

@@ -7,8 +7,8 @@ import com.flux.flux.v1.auth.dto.RegisterDTO;
 import com.flux.flux.v1.token.access.AccessTokenService;
 import com.flux.flux.v1.token.refresh.RefreshToken;
 import com.flux.flux.v1.token.refresh.RefreshTokenService;
+import com.flux.flux.v1.token.shared.Token;
 import com.flux.flux.v1.token.shared.dto.CreateTokenDTO;
-import com.flux.flux.v1.token.shared.dto.TokenDTO;
 import com.flux.flux.v1.user.User;
 import com.flux.flux.v1.user.UserMapper;
 import com.flux.flux.v1.user.UserService;
@@ -37,11 +37,11 @@ public class AuthService {
     public AuthDTO register(RegisterDTO registerDTO, HttpServletResponse response) {
         saveFingerprintCookie(response, registerDTO.fingerprint());
         User user = userService.createUser(registerDTO);
-        TokenDTO accessTokenDTO = createAuthenticationSession(user, registerDTO.fingerprint(), response);
+        Token accessToken = createAuthenticationSession(user, registerDTO.fingerprint(), response);
 
         return AuthDTO.builder()
                 .user(userMapper.toDTO(user))
-                .token(accessTokenDTO)
+                .token(accessToken.getToken())
                 .build();
     }
 
@@ -54,11 +54,11 @@ public class AuthService {
         saveFingerprintCookie(response, loginDTO.fingerprint());
         User user = userService.findByEmail(loginDTO.email());
         userSessionService.deactivatePreviousSessions(user, loginDTO.fingerprint());
-        TokenDTO accessTokenDTO = createAuthenticationSession(user, loginDTO.fingerprint(), response);
+        Token accessToken = createAuthenticationSession(user, loginDTO.fingerprint(), response);
 
         return AuthDTO.builder()
                 .user(userMapper.toDTO(user))
-                .token(accessTokenDTO)
+                .token(accessToken.getToken())
                 .build();
     }
 
@@ -75,7 +75,7 @@ public class AuthService {
         response.addHeader(HttpHeaders.SET_COOKIE, fingerprintCookie.toString());
     }
 
-    private TokenDTO createAuthenticationSession(User user, String fingerprint, HttpServletResponse response) {
+    private Token createAuthenticationSession(User user, String fingerprint, HttpServletResponse response) {
         CreateUserSessionDTO createUserSessionDTO = CreateUserSessionDTO.builder()
                 .user(user)
                 .build();
@@ -88,10 +88,10 @@ public class AuthService {
 
         accessTokenService.revokeActiveTokens(userSession);
 
-        TokenDTO accessTokenDTO = accessTokenService.createToken(createTokenDTO);
-        TokenDTO refreshTokenDTO = refreshTokenService.createToken(createTokenDTO);
+        Token accessToken = accessTokenService.createToken(createTokenDTO);
+        Token refreshToken = refreshTokenService.createToken(createTokenDTO);
 
-        ResponseCookie refreshTokenCookie = ResponseCookie.from("__rtid", refreshTokenDTO.token())
+        ResponseCookie refreshTokenCookie = ResponseCookie.from("__rtid", refreshToken.getToken())
                 .httpOnly(true)
                 .secure(false)
 //                .partitioned(true)
@@ -102,7 +102,7 @@ public class AuthService {
 
         response.addHeader(HttpHeaders.SET_COOKIE, refreshTokenCookie.toString());
 
-        return accessTokenDTO;
+        return accessToken;
     }
 
     @Transactional
@@ -133,7 +133,6 @@ public class AuthService {
 //                .partitioned(true)
                 .path("/")
                 .sameSite("Lax")
-                .maxAge(jwtService.getJwtRefreshExpiration())
                 .build();
 
         response.addHeader(HttpHeaders.SET_COOKIE, refreshTokenCookie.toString());
@@ -157,11 +156,11 @@ public class AuthService {
                 .user(refreshTokenEntity.getUserSession().getUser())
                 .build();
 
-        TokenDTO accessTokenDTO = accessTokenService.createToken(createTokenDTO);
+        Token accessToken = accessTokenService.createToken(createTokenDTO);
 
         return AuthDTO.builder()
                 .user(userMapper.toDTO(refreshTokenEntity.getUserSession().getUser()))
-                .token(accessTokenDTO)
+                .token(accessToken.getToken())
                 .build();
     }
 }

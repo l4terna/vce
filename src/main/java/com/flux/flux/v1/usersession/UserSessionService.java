@@ -34,7 +34,6 @@ public class UserSessionService {
                 .user(createDTO.user())
                 .lastActivity(LocalDateTime.now())
                 .deviceInfo(getDeviceInfo())
-                .lastActivity(LocalDateTime.now())
                 .ipAddress(getClientIpAddress())
                 .fingerprint(fingerprint)
                 .build();
@@ -120,13 +119,14 @@ public class UserSessionService {
     }
 
     @Transactional
-    public void deactivateSession(Long id, String fingerprint, User currentUser) {
+    public void deactivateSession(Long id) {
         UserSession userSession = userSessionRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Session not found"));
+
         userSession.setIsActive(false);
 
-        accessTokenService.revokeActiveTokensByFingerprintAndUser(fingerprint, currentUser);
-        refreshTokenService.revokeActiveTokensByFingerprintAndUser(fingerprint, currentUser);
+        accessTokenService.revokeActiveTokens(userSession);
+        refreshTokenService.revokeActiveTokens(userSession);
 
         userSessionRepository.save(userSession);
     }

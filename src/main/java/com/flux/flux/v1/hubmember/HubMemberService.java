@@ -40,10 +40,14 @@ public class HubMemberService {
         hubMemberRepository.delete(hubMember);
     }
 
-
     @Transactional(readOnly = true)
-    public HubMember findByHubIdAndUserId(Long hubId, Long userId) {
+    public HubMember findMemberByHubIdAndUserId(Long hubId, Long userId) {
         return hubMemberRepository.findByUserIdAndHubId(userId, hubId)
                 .orElseThrow(() -> new EntityNotFoundException("Member not found"));
+    }
+
+    @Transactional(readOnly = true)
+    public HubMemberDTO findByHubIdAndUserId(Long hubId, Long userId) {
+        return hubMemberMapper.toDTO(findMemberByHubIdAndUserId(hubId, userId));
     }
 }

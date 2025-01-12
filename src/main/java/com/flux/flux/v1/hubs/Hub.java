@@ -1,6 +1,7 @@
 package com.flux.flux.v1.hubs;
 
 import com.flux.flux.v1._shared.model.entity.BaseEntity;
+import com.flux.flux.v1.hubs.enumeration.HubType;
 import com.flux.flux.v1.user.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -19,6 +20,10 @@ import lombok.experimental.SuperBuilder;
 public class Hub extends BaseEntity {
     @Column(nullable = false)
     private String name;
+
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    private HubType type;
 
     @ManyToOne
     @JoinColumn(name = "owner_id")

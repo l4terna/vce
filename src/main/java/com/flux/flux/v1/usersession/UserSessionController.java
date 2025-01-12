@@ -24,12 +24,8 @@ public class UserSessionController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> revokeUserSession(
-            @PathVariable Long id,
-            @CookieValue("__fprid") String fingerprint,
-            @AuthenticationPrincipal User user
-    ) {
-        userSessionService.deactivateSession(id, fingerprint, user);
+    public ResponseEntity<Void> revokeUserSession(@PathVariable Long id) {
+        userSessionService.deactivateSession(id);
         return ResponseEntity.noContent().build();
     }
 

@@ -3,10 +3,12 @@ package com.flux.flux.v1.hubs;
 import com.flux.flux.v1._shared.model.dto.PageableDTO;
 import com.flux.flux.v1.hubs.dto.HubDTO;
 import com.flux.flux.v1.hubs.dto.UpdateHubDTO;
+import com.flux.flux.v1.hubs.enumeration.HubType;
 import com.flux.flux.v1.permission.PermissionService;
 import com.flux.flux.v1.permission.enumeration.Permission;
 import com.flux.flux.v1.user.User;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.validation.ValidationException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.security.access.AccessDeniedException;
@@ -27,6 +29,12 @@ public class HubService {
                 .map(hubMapper::toDTO);
     }
 
+    @Transactional(readOnly = true)
+    public Page<HubDTO> getAllUserHubs(PageableDTO pageableDTO, User currentUser) {
+        return hubRepository.findAllByUserId(pageableDTO.toPageable(), currentUser.getId())
+                .map(hubMapper::toDTO);
+    }
+
     @Transactional
     public HubDTO update(Long id, UpdateHubDTO updateHubDTO, User currentUser) {
         Hub hub = hubRepository.findById(id).
@@ -36,6 +44,15 @@ public class HubService {
 
         if (updateHubDTO.name() != null && !updateHubDTO.name().equals(hub.getName())) {
             hub.setName(updateHubDTO.name());
+        }
+
+        try {
+            HubType hubType = HubType.valueOf(updateHubDTO.type());
+            if (updateHubDTO.type() != null && hubType != hub.getType()) {
+                hub.setType(hubType);
+            }
+        } catch (Exception e) {
+            throw new ValidationException("Invalid hub type");
         }
 
         hubRepository.save(hub);
@@ -71,11 +88,5 @@ public class HubService {
     public Hub findHubByChannelId(Long channelId) {
         return hubRepository.findHubByChannelId(channelId)
                 .orElseThrow(() -> new EntityNotFoundException("Hub not found by channel id: " + channelId));
-    }
-
-    @Transactional(readOnly = true)
-    public Hub findHubByCategoryId(Long categoryId) {
-        return hubRepository.findHubByCategoryId(categoryId)
-                .orElseThrow(() -> new EntityNotFoundException("Hub not found by category id: " + categoryId));
     }
 }

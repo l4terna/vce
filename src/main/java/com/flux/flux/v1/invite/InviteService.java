@@ -78,7 +78,7 @@ public class InviteService {
             throw new AccessDeniedException("Code expired");
         }
 
-        hubMemberCreationService.createMember(hubId, user);
+        hubMemberCreationService.create(hubId, user);
 
         invite.setCurrentUses(invite.getCurrentUses() + 1);
         inviteRepository.save(invite);
