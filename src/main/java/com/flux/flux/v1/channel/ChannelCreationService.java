@@ -31,7 +31,9 @@ public class ChannelCreationService {
     public ChannelDTO createHubChannel(CreateHubChannelDTO createChannelDTO, User currentUser) {
         Category category = categoryService.findCategoryByIdWithHub(createChannelDTO.categoryId());
 
-        if (createChannelDTO.type() != ChannelType.TEXT && createChannelDTO.type() != ChannelType.VOICE) {
+        ChannelType type = ChannelType.valueOf(createChannelDTO.type());
+
+        if (type != ChannelType.TEXT && type != ChannelType.VOICE) {
             throw new IllegalArgumentException("Channel type must be either TEXT or VOICE");
         }
 
@@ -39,7 +41,7 @@ public class ChannelCreationService {
 
         Channel channel = Channel.builder()
                 .categoryId(category.getId())
-                .type(createChannelDTO.type())
+                .type(type)
                 .owner(currentUser)
                 .name(createChannelDTO.name())
                 .position(channelService.getLastPosition(category.getId()))

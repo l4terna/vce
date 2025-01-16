@@ -2,6 +2,7 @@ package com.flux.flux.v1._shared.exception.handler;
 
 import com.flux.flux.v1._shared.exception.EntityAlreadyExistsException;
 import com.flux.flux.v1._shared.exception.ErrorResponse;
+import com.flux.flux.v1._shared.exception.enumeration.ErrorType;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
@@ -31,7 +32,7 @@ public class GlobalExceptionHandler implements ErrorController {
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ErrorResponse handleEntityNotFound(Exception ex) {
         return createErrorResponse(
-            "Not found",
+            ErrorType.NOT_FOUND,
             ex.getMessage(),
             HttpStatus.NOT_FOUND.value()
         );
@@ -41,7 +42,7 @@ public class GlobalExceptionHandler implements ErrorController {
     @ResponseStatus(HttpStatus.CONFLICT)
     public ErrorResponse handleEntityExists(EntityAlreadyExistsException ex) {
         return createErrorResponse(
-            "Already exists",
+            ErrorType.ALREADY_EXISTS,
             ex.getMessage(),
             HttpStatus.CONFLICT.value()
         );
@@ -51,7 +52,7 @@ public class GlobalExceptionHandler implements ErrorController {
     @ResponseStatus(HttpStatus.FORBIDDEN)
     public ErrorResponse handleAccessDenied(AccessDeniedException ex) {
         return createErrorResponse(
-                "Access denied",
+                ErrorType.ACCESS_DENIED,
                 ex.getMessage(),
                 HttpStatus.FORBIDDEN.value()
         );
@@ -79,14 +80,14 @@ public class GlobalExceptionHandler implements ErrorController {
         }
         else {
             return createErrorResponse(
-                    "Validation failed",
+                    ErrorType.VALIDATION_ERROR,
                     ex.getMessage(),
                     HttpStatus.BAD_REQUEST.value()
             );
         }
 
         return createErrorResponse(
-                "Validation failed",
+                ErrorType.VALIDATION_ERROR,
                 errors,
                 HttpStatus.BAD_REQUEST.value()
         );
@@ -96,13 +97,13 @@ public class GlobalExceptionHandler implements ErrorController {
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ErrorResponse handleGeneral(Exception ex) {
         return createErrorResponse(
-                "Internal server error",
+                ErrorType.INTERNAL_SERVER_ERROR,
                 ex.getMessage(),
                 HttpStatus.INTERNAL_SERVER_ERROR.value()
         );
     }
 
-    private ErrorResponse createErrorResponse(String type, String message, int statusCode) {
+    private ErrorResponse createErrorResponse(ErrorType type, String message, int statusCode) {
         return ErrorResponse.builder()
                 .type(type)
                 .message(message)
@@ -111,7 +112,7 @@ public class GlobalExceptionHandler implements ErrorController {
                 .build();
     }
 
-    private ErrorResponse createErrorResponse(String type, List<String> errors, int statusCode) {
+    private ErrorResponse createErrorResponse(ErrorType type, List<String> errors, int statusCode) {
         return ErrorResponse.builder()
                 .type(type)
                 .errors(errors)

@@ -3,6 +3,7 @@ package com.flux.flux.v1.hubs;
 import com.flux.flux.v1.hubs.dto.CreateHubDTO;
 import com.flux.flux.v1.hubs.dto.HubDTO;
 import com.flux.flux.v1.hubmember.HubMemberCreationService;
+import com.flux.flux.v1.hubs.enumeration.HubType;
 import com.flux.flux.v1.user.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -17,10 +18,12 @@ public class HubCreationService {
 
     @Transactional
     public HubDTO create(CreateHubDTO createHubDTO, User currentUser) {
+        HubType type = HubType.valueOf(createHubDTO.type());
+
         Hub hub = Hub.builder()
                 .name(createHubDTO.name())
                 .owner(currentUser)
-                .type(createHubDTO.type())
+                .type(type)
                 .build();
 
         Hub savedHub = hubRepository.save(hub);

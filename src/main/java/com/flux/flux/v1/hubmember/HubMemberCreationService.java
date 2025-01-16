@@ -5,7 +5,6 @@ import com.flux.flux.v1.hubmember.dto.HubMemberDTO;
 import com.flux.flux.v1.hubs.Hub;
 import com.flux.flux.v1.hubs.HubService;
 import com.flux.flux.v1.hubs.enumeration.HubType;
-import com.flux.flux.v1.permission.PermissionService;
 import com.flux.flux.v1.user.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.AccessDeniedException;
@@ -18,7 +17,6 @@ public class HubMemberCreationService {
     private final HubService hubService;
     private final HubMemberRepository hubMemberRepository;
     private final HubMemberMapper hubMemberMapper;
-    private final PermissionService permissionService;
 
     @Transactional
     public HubMember create(Hub hub, User user) {

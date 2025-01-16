@@ -8,14 +8,21 @@ import com.flux.flux.v1.hubs.HubService;
 import com.flux.flux.v1.message.dto.CreateMessageDTO;
 import com.flux.flux.v1.message.dto.MessageDTO;
 import com.flux.flux.v1.message.dto.UpdateMessageDTO;
+import com.flux.flux.v1.message.event.MessageCreatedEvent;
+import com.flux.flux.v1.message.event.MessageDeletedEvent;
+import com.flux.flux.v1.message.event.MessageUpdatedEvent;
 import com.flux.flux.v1.permission.PermissionService;
 import com.flux.flux.v1.permission.enumeration.Permission;
 import com.flux.flux.v1.user.User;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDateTime;
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -25,6 +32,7 @@ public class MessageService {
     private final MessageMapper messageMapper;
     private final PermissionService permissionService;
     private final HubService hubService;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Transactional
     public MessageDTO create(Long channelId, CreateMessageDTO createMessageDTO, User currentUser) {
@@ -35,14 +43,17 @@ public class MessageService {
             permissionService.hasPermissionsThrow(currentUser.getId(), hub.getId(), Permission.SEND_MESSAGES);
         }
 
-
         Message message = Message.builder()
                 .content(createMessageDTO.content())
                 .author(currentUser)
                 .channel(channel)
                 .build();
 
-        return messageMapper.toDTO(messageRepository.save(message));
+        MessageDTO newMessageDTO = messageMapper.toDTO(messageRepository.save(message));
+
+        eventPublisher.publishEvent(new MessageCreatedEvent(newMessageDTO, channelId));
+
+        return newMessageDTO;
     }
 
     @Transactional
@@ -54,9 +65,20 @@ public class MessageService {
             throw new AccessDeniedException("Permission denied");
         }
 
+        boolean hasChanges = !message.getContent().equals(updateMessageDTO.content());
+
+        if (!hasChanges) {
+            return messageMapper.toDTO(message);
+        }
+
         message.setContent(updateMessageDTO.content());
 
-        return messageMapper.toDTO(messageRepository.save(message));
+        Message savedMessage = messageRepository.save(message);
+        MessageDTO updatedMessageDTO = messageMapper.toDTO(savedMessage);
+
+        eventPublisher.publishEvent(new MessageUpdatedEvent(updatedMessageDTO, channelId));
+
+        return updatedMessageDTO;
     }
 
     @Transactional(readOnly = true)
@@ -81,5 +103,7 @@ public class MessageService {
         }
 
         messageRepository.delete(message);
+
+        eventPublisher.publishEvent(new MessageDeletedEvent(messageId, channelId));
     }
 }

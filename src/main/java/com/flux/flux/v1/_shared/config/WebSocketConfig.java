@@ -1,6 +1,8 @@
 package com.flux.flux.v1._shared.config;
 
+import com.flux.flux.v1._shared.websocket.error.StompSubProtocolErrorHandlerImpl;
 import com.flux.flux.v1._shared.websocket.interceptor.ChannelAuthInterceptor;
+import com.flux.flux.v1._shared.websocket.interceptor.ChannelSubscriptionInterceptor;
 import com.flux.flux.v1._shared.websocket.interceptor.HandshakeInterceptorImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -18,6 +20,8 @@ import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerCo
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     private final ChannelAuthInterceptor channelAuthInterceptor;
     private final HandshakeInterceptorImpl handshakeInterceptorImpl;
+    private final ChannelSubscriptionInterceptor channelSubscriptionInterceptor;
+    private final StompSubProtocolErrorHandlerImpl stompSubProtocolErrorHandlerImpl;
 
     @Value("${app.cors.allowed-origins}")
     private String allowedOrigins;
@@ -34,12 +38,15 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
                 .setAllowedOrigins(allowedOrigins)
                 .addInterceptors(handshakeInterceptorImpl)
                 .withSockJS();
+
+        registry.addEndpoint("/ws");
+        registry.setErrorHandler(stompSubProtocolErrorHandlerImpl);
     }
 
     @Override
     public void configureClientInboundChannel(ChannelRegistration registration) {
         registration.interceptors(channelAuthInterceptor);
-//        registration.interceptors(channelSubscriptionInterceptor);
+        registration.interceptors(channelSubscriptionInterceptor);
     }
 
 }

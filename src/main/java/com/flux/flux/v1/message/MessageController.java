@@ -7,7 +7,6 @@ import com.flux.flux.v1.user.User;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -16,7 +15,6 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class MessageController {
     private final MessageService messageService;
-    private final SimpMessagingTemplate messagingTemplate;
 
     @PostMapping
     public ResponseEntity<MessageDTO> createMessage(
@@ -25,11 +23,6 @@ public class MessageController {
             @AuthenticationPrincipal User user
     ) {
         MessageDTO message = messageService.create(channelId, createMessageDTO, user);
-
-        messagingTemplate.convertAndSend(
-                "/topic/channels/" + channelId + "/messages",
-                message
-        );
 
         return ResponseEntity.ok(message);
     }
@@ -43,11 +36,6 @@ public class MessageController {
     ) {
         MessageDTO message = messageService.update(channelId, messageId, updateMessageDTO, user);
 
-        messagingTemplate.convertAndSend(
-                "/topic/channels/" + channelId + "/messages/update",
-                message
-        );
-
         return ResponseEntity.ok(message);
     }
 
@@ -58,11 +46,6 @@ public class MessageController {
             @AuthenticationPrincipal User user
     ) {
         messageService.delete(channelId, messageId, user);
-
-        messagingTemplate.convertAndSend(
-                "/topic/channels/" + channelId + "/messages/delete",
-                messageId
-        );
 
         return ResponseEntity.noContent().build();
     }

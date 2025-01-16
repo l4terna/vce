@@ -52,7 +52,7 @@ public class AuthService {
         }
 
         saveFingerprintCookie(response, loginDTO.fingerprint());
-        User user = userService.findByEmail(loginDTO.email());
+        User user = userService.findUserByEmail(loginDTO.email());
         userSessionService.deactivatePreviousSessions(user, loginDTO.fingerprint());
         Token accessToken = createAuthenticationSession(user, loginDTO.fingerprint(), response);
 

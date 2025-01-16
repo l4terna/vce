@@ -2,6 +2,7 @@ package com.flux.flux.v1._shared.security.jwt;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.flux.flux.v1._shared.exception.ErrorResponse;
+import com.flux.flux.v1._shared.exception.enumeration.ErrorType;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -31,7 +32,7 @@ public class RestAuthenticationEntryPoint implements AuthenticationEntryPoint {
        ErrorResponse errorResponse = ErrorResponse.builder()
            .statusCode(HttpStatus.UNAUTHORIZED.value())
            .message("Invalid credentials")
-           .type("Unauthorized")
+           .type(ErrorType.UNAUTHORIZED)
            .path(request.getRequestURI())
            .timestamp(LocalDateTime.now())
            .build();

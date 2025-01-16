@@ -8,7 +8,6 @@ import com.flux.flux.v1.user.dto.GetUserFilter;
 import com.flux.flux.v1.user.dto.UserDTO;
 import com.flux.flux.v1.user.dto.UserProfileDTO;
 import jakarta.persistence.EntityNotFoundException;
-import jakarta.validation.constraints.NotEmpty;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -25,7 +24,7 @@ public class UserService {
     private final HubMemberService hubMemberService;
 
     @Transactional(readOnly = true)
-    public User findByEmail(String email) {
+    public User findUserByEmail(String email) {
         return userRepository.findByEmail(email)
                 .orElseThrow(() -> new EntityNotFoundException("User not found"));
     }
@@ -65,7 +64,7 @@ public class UserService {
     }
 
     @Transactional(readOnly = true)
-    public List<User> findAllByIds(@NotEmpty List<Long> users) {
+    public List<User> findAllByIds(List<Long> users) {
         return userRepository.findAllById(users);
     }
 

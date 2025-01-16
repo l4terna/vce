@@ -2,6 +2,7 @@ package com.flux.flux.v1._shared.exception.handler;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.flux.flux.v1._shared.exception.ErrorResponse;
+import com.flux.flux.v1._shared.exception.enumeration.ErrorType;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -25,7 +26,7 @@ public class AccessDeniedHandlerImpl implements AccessDeniedHandler {
         ErrorResponse error = ErrorResponse.builder()
                 .statusCode(HttpStatus.FORBIDDEN.value())
                 .message(ex.getMessage())
-                .type("Access denied")
+                .type(ErrorType.ACCESS_DENIED)
                 .timestamp(LocalDateTime.now())
                 .path(request.getRequestURI())
                 .build();
