@@ -10,18 +10,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
 @RestController
 @RequestMapping("/api/v1/hubs/{hubId}/categories")
 @RequiredArgsConstructor
 public class CategoryController {
     private final CategoryService categoryService;
-
-    @GetMapping
-    public ResponseEntity<List<CategoryDTO>> getCategories(@PathVariable Long hubId) {
-        return ResponseEntity.ok(categoryService.getAllCategories(hubId));
-    }
 
     @PostMapping
     public ResponseEntity<CategoryDTO> createCategory(

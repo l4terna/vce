@@ -1,7 +1,7 @@
 package com.flux.flux.v1.hubs.dto;
 
+import com.flux.flux.v1.hubs.enumeration.HubType;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
 public record CreateHubDTO(
@@ -9,8 +9,6 @@ public record CreateHubDTO(
         @Size(max = 100)
         String name,
 
-        @NotBlank
-        @Pattern(regexp = "PRIVATE|PUBLIC")
-        String type
+        HubType type
 ){
 }

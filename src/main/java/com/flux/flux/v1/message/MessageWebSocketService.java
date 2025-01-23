@@ -6,36 +6,48 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
+import java.util.Set;
+
 @Service
 @RequiredArgsConstructor
 public class MessageWebSocketService {
     private final SimpMessagingTemplate messagingTemplate;
 
-    public void notifyMessageCreated(MessageDTO message, Long channelId) {
-        WebSocketMessage wsMessage = WebSocketMessage.builder("MESSAGE_CREATE")
-                .add("id", message.id())
-                .add("content", message.content())
-                .add("created_at", message.createdAt())
-                .add("last_modified_at", message.lastModifiedAt())
-                .add("channelId", channelId)
-                .build();
+    public void messageCreated(MessageDTO message, Long channelId) {
+//        for (Long memberId : channelMemberIds) {
+//            boolean isRead = memberId.equals(message.author().id());
 
-        send(channelId, wsMessage);
+            WebSocketMessage wsMessage = WebSocketMessage.builder("MESSAGE_CREATE")
+                    .add("id", message.id())
+                    .add("author", message.author())
+                    .add("content", message.content())
+                    .add("created_at", message.createdAt())
+                    .add("channelId", channelId)
+                    .build();
+
+            send(channelId, wsMessage);
+
+//            messagingTemplate.convertAndSendToUser(
+//                    memberId.toString(),
+//                    "/topic/channels/" + channelId + "/messages",
+//                    wsMessage
+//            );
+//        }
     }
 
-    public void notifyMessageUpdated(MessageDTO message, Long channelId) {
+    public void messageUpdated(MessageDTO message, Long channelId) {
         WebSocketMessage wsMessage = WebSocketMessage.builder("MESSAGE_UPDATE")
                 .add("id", message.id())
+                .add("author", message.author())
                 .add("content", message.content())
                 .add("created_at", message.createdAt())
-                .add("last_modified_at", message.lastModifiedAt())
                 .add("channelId", channelId)
                 .build();
 
         send(channelId, wsMessage);
     }
 
-    public void notifyMessageDeleted(Long messageId, Long channelId) {
+    public void messageDeleted(Long messageId, Long channelId) {
         WebSocketMessage wsMessage = WebSocketMessage.builder("MESSAGE_DELETE")
                 .add("id", messageId)
                 .add("channelId", channelId)

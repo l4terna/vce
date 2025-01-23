@@ -7,16 +7,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
 
 @Service
 public abstract class TokenService<T extends Token> {
-    private final TokenMapper<T> tokenMapper;
     protected final TokenRepository<T> tokenRepository;
 
-    protected TokenService(TokenMapper<T> tokenMapper, TokenRepository<T> tokenRepository) {
-        this.tokenMapper = tokenMapper;
+    protected TokenService(TokenRepository<T> tokenRepository) {
         this.tokenRepository = tokenRepository;
     }
 
@@ -24,10 +20,7 @@ public abstract class TokenService<T extends Token> {
     public Token createToken(CreateTokenDTO createDTO) {
         String jwtToken = generateToken(createDTO.user());
 
-        LocalDateTime expiresAt = LocalDateTime.ofInstant(
-                Instant.now().plusMillis(getExpirationTime() * 1000),
-                ZoneId.systemDefault()
-        );
+        Instant expiresAt = Instant.now().plusMillis(getExpirationTime() * 1000);
 
         T token = createTokenEntity(
                 CreateTokenDTO.builder()
@@ -54,5 +47,5 @@ public abstract class TokenService<T extends Token> {
     public abstract boolean validateToken(String token, String fingerprint);
     protected abstract long getExpirationTime();
     protected abstract String generateToken(User user);
-    protected abstract T createTokenEntity(CreateTokenDTO dto, LocalDateTime expiresAt);
+    protected abstract T createTokenEntity(CreateTokenDTO dto, Instant expiresAt);
 }

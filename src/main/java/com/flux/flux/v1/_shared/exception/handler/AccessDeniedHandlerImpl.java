@@ -12,7 +12,7 @@ import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 @Component
 public class AccessDeniedHandlerImpl implements AccessDeniedHandler {
@@ -27,7 +27,7 @@ public class AccessDeniedHandlerImpl implements AccessDeniedHandler {
                 .statusCode(HttpStatus.FORBIDDEN.value())
                 .message(ex.getMessage())
                 .type(ErrorType.ACCESS_DENIED)
-                .timestamp(LocalDateTime.now())
+                .timestamp(Instant.now())
                 .path(request.getRequestURI())
                 .build();
 

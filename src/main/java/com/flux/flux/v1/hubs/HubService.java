@@ -3,12 +3,10 @@ package com.flux.flux.v1.hubs;
 import com.flux.flux.v1._shared.model.dto.PageableDTO;
 import com.flux.flux.v1.hubs.dto.HubDTO;
 import com.flux.flux.v1.hubs.dto.UpdateHubDTO;
-import com.flux.flux.v1.hubs.enumeration.HubType;
 import com.flux.flux.v1.permission.PermissionService;
 import com.flux.flux.v1.permission.enumeration.Permission;
 import com.flux.flux.v1.user.User;
 import jakarta.persistence.EntityNotFoundException;
-import jakarta.validation.ValidationException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.security.access.AccessDeniedException;
@@ -46,13 +44,8 @@ public class HubService {
             hub.setName(updateHubDTO.name());
         }
 
-        try {
-            HubType hubType = HubType.valueOf(updateHubDTO.type());
-            if (updateHubDTO.type() != null && hubType != hub.getType()) {
-                hub.setType(hubType);
-            }
-        } catch (Exception e) {
-            throw new ValidationException("Invalid hub type");
+        if (updateHubDTO.type() != hub.getType()) {
+            hub.setType(updateHubDTO.type());
         }
 
         hubRepository.save(hub);

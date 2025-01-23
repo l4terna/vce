@@ -5,11 +5,11 @@ import com.flux.flux.v1.usersession.UserSession;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.NoRepositoryBean;
+import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
 
-@NoRepositoryBean
+@Repository
 public interface TokenRepository<T extends Token> extends JpaRepository<T, Long> {
     Optional<T> findByToken(String token);
 

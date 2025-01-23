@@ -12,7 +12,7 @@ import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 @Component
 @RequiredArgsConstructor
@@ -34,7 +34,7 @@ public class RestAuthenticationEntryPoint implements AuthenticationEntryPoint {
            .message("Invalid credentials")
            .type(ErrorType.UNAUTHORIZED)
            .path(request.getRequestURI())
-           .timestamp(LocalDateTime.now())
+           .timestamp(Instant.now())
            .build();
 
        String jsonResponse = objectMapper.writeValueAsString(errorResponse);

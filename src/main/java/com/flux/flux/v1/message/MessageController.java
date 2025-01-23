@@ -1,6 +1,7 @@
 package com.flux.flux.v1.message;
 
 import com.flux.flux.v1.message.dto.CreateMessageDTO;
+import com.flux.flux.v1.message.dto.GetMessagesFilter;
 import com.flux.flux.v1.message.dto.MessageDTO;
 import com.flux.flux.v1.message.dto.UpdateMessageDTO;
 import com.flux.flux.v1.user.User;
@@ -10,11 +11,21 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/v1/channels/{channelId}/messages")
 @RequiredArgsConstructor
 public class MessageController {
     private final MessageService messageService;
+
+    @GetMapping
+    public ResponseEntity<List<MessageDTO>> getMessages(
+            @PathVariable Long channelId,
+            @AuthenticationPrincipal User user,
+            @Valid @ModelAttribute GetMessagesFilter filter) {
+        return ResponseEntity.ok(messageService.getChannelMessages(channelId, user, filter));
+    }
 
     @PostMapping
     public ResponseEntity<MessageDTO> createMessage(

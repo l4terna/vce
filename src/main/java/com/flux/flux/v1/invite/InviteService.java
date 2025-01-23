@@ -18,7 +18,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.security.SecureRandom;
-import java.time.LocalDateTime;
+import java.time.Instant;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 
 @Service
 @RequiredArgsConstructor
@@ -39,10 +41,10 @@ public class InviteService {
 
         permissionService.hasPermissionsThrow(currentUser.getId(), hubId, Permission.CREATE_INVITE);
 
-        LocalDateTime expiresAt = createInviteDTO.expiresAt();
+        OffsetDateTime expiresAt = createInviteDTO.expiresAt();
 
         if (expiresAt == null) {
-            expiresAt = LocalDateTime.now().plusDays(7);
+            expiresAt = OffsetDateTime.now(ZoneOffset.UTC).plusDays(7);
         }
 
         Invite invite = Invite.builder()
@@ -73,7 +75,7 @@ public class InviteService {
         // maxUses = null = endless uses
         if (!invite.getIsActive() ||
                 (invite.getMaxUses() != null && invite.getMaxUses() <= invite.getCurrentUses()) ||
-                invite.getExpiresAt().isBefore(LocalDateTime.now())
+                invite.getExpiresAt().isBefore(OffsetDateTime.now(ZoneOffset.UTC))
         ) {
             throw new AccessDeniedException("Code expired");
         }

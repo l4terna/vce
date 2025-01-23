@@ -5,7 +5,8 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.Positive;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
+import java.time.OffsetDateTime;
 
 public record CreateInviteDTO(
         @Positive
@@ -13,6 +14,6 @@ public record CreateInviteDTO(
 
         @Future
         @JsonFormat(pattern = "yyyy-MM-dd")
-        LocalDateTime expiresAt
+        OffsetDateTime expiresAt
 ) {
 }

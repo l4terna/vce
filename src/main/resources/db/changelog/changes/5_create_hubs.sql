@@ -6,7 +6,7 @@ CREATE TABLE hubs(
     name VARCHAR(100) NOT NULL,
     owner_id BIGINT REFERENCES users(id),
     type VARCHAR(10) NOT NULL,
-    created_at TIMESTAMP NOT NULL,
-    last_modified_at TIMESTAMP NOT NULL
+    created_at TIMESTAMPTZ NOT NULL,
+    last_modified_at TIMESTAMPTZ NOT NULL
 );
 -- rollback DROP TABLE hubs;

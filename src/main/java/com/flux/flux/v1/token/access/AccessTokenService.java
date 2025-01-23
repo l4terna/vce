@@ -1,6 +1,6 @@
 package com.flux.flux.v1.token.access;
 
-import com.flux.flux.v1.token.shared.TokenMapper;
+import com.flux.flux.v1.token.shared.TokenRepository;
 import com.flux.flux.v1.token.shared.TokenService;
 import com.flux.flux.v1._shared.security.jwt.JwtService;
 import com.flux.flux.v1.token.shared.dto.CreateTokenDTO;
@@ -8,17 +8,16 @@ import com.flux.flux.v1.user.User;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 @Service
 public class AccessTokenService extends TokenService<AccessToken> {
     private final JwtService jwtService;
 
     public AccessTokenService(
-            TokenMapper<AccessToken> tokenMapper,
-            AccessTokenRepository tokenRepository,
+            TokenRepository<AccessToken> tokenRepository,
             JwtService jwtService) {
-        super(tokenMapper, tokenRepository);
+        super(tokenRepository);
         this.jwtService = jwtService;
     }
 
@@ -33,7 +32,7 @@ public class AccessTokenService extends TokenService<AccessToken> {
     }
 
     @Override
-    protected AccessToken createTokenEntity(CreateTokenDTO dto, LocalDateTime expiresAt) {
+    protected AccessToken createTokenEntity(CreateTokenDTO dto, Instant expiresAt) {
         return AccessToken.builder()
                 .token(dto.token())
                 .userSession(dto.userSession())
@@ -47,7 +46,7 @@ public class AccessTokenService extends TokenService<AccessToken> {
                 .orElseThrow(() -> new EntityNotFoundException("Token not found"));
 
         return token.getUserSession().getFingerprint().equals(fingerprint)
-                && token.getExpiresAt().isAfter(LocalDateTime.now())
+                && token.getExpiresAt().isAfter(Instant.now())
                 && !token.getIsRevoked();
     }
 

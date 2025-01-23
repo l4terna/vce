@@ -63,7 +63,7 @@ liquibase {
     activities {
         main {
             changelogFile 'src/main/resources/db/changelog/db.changelog-master.yaml'
-            url 'jdbc:postgresql://localhost:5432/vce'
+            url 'jdbc:postgresql://localhost:5433/flux?reWriteBatchedInserts=true'
             username 'postgres'
             password 'postgres'
             logLevel 'debug'

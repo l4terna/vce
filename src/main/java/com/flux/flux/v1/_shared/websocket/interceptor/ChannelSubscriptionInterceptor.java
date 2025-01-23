@@ -1,5 +1,9 @@
 package com.flux.flux.v1._shared.websocket.interceptor;
 
+import com.flux.flux.v1.channel.Channel;
+import com.flux.flux.v1.channel.ChannelService;
+import com.flux.flux.v1.channel.enumeration.ChannelType;
+import com.flux.flux.v1.channelmember.ChannelMemberService;
 import com.flux.flux.v1.hubs.Hub;
 import com.flux.flux.v1.hubs.HubService;
 import com.flux.flux.v1.permission.PermissionService;
@@ -25,9 +29,11 @@ public class ChannelSubscriptionInterceptor implements ChannelInterceptor {
     private final PermissionService permissionService;
     private final HubService hubService;
     private final UserService userService;
+    private final ChannelService channelService;
+    private final ChannelMemberService channelMemberService;
 
     @Override
-    public Message<?> preSend(Message<?> message, MessageChannel channel) {
+    public Message<?> preSend(Message<?> message, MessageChannel messageChannel) {
         StompHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
 
         if (accessor != null && StompCommand.SUBSCRIBE.equals(accessor.getCommand())) {
@@ -42,10 +48,14 @@ public class ChannelSubscriptionInterceptor implements ChannelInterceptor {
                 User user = userService.findUserByEmail(principal.getName());
 
                 Long channelId = extractChannelId(destination);
+                Channel channel = channelService.findChannelById(channelId);
 
-                Hub hub = hubService.findHubByChannelId(channelId);
-
-                permissionService.hasPermissionsThrow(user.getId(), hub.getId(), Permission.SEND_MESSAGES);
+                if ((channel.getType() == ChannelType.DC || channel.getType() == ChannelType.GROUP_DC)) {
+                    channelMemberService.isMemberThrow(channelId, user.getId());
+                } else {
+                    Hub hub = hubService.findHubByChannelId(channelId);
+                    permissionService.hasPermissionsThrow(user.getId(), hub.getId(), Permission.SEND_MESSAGES);
+                }
             }
         }
         return message;

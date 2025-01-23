@@ -6,7 +6,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
@@ -17,7 +17,7 @@ import java.time.LocalDateTime;
 @Table(name = "user_sessions")
 public class UserSession extends BaseEntity {
     @Column(nullable = false)
-    private LocalDateTime lastActivity;
+    private Instant lastActivity;
 
     @Column(nullable = false)
     private String ipAddress;

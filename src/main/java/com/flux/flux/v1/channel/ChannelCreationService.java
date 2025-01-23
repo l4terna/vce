@@ -11,6 +11,7 @@ import com.flux.flux.v1.channelmember.dto.CreateChannelMemberDTO;
 import com.flux.flux.v1.permission.PermissionService;
 import com.flux.flux.v1.permission.enumeration.Permission;
 import com.flux.flux.v1.user.User;
+import jakarta.validation.ValidationException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,20 +29,18 @@ public class ChannelCreationService {
     private final ChannelMemberService channelMemberService;
 
     @Transactional
-    public ChannelDTO createHubChannel(CreateHubChannelDTO createChannelDTO, User currentUser) {
+    public ChannelDTO createHubChannel(Long hubId, CreateHubChannelDTO createChannelDTO, User currentUser) {
         Category category = categoryService.findCategoryByIdWithHub(createChannelDTO.categoryId());
 
-        ChannelType type = ChannelType.valueOf(createChannelDTO.type());
-
-        if (type != ChannelType.TEXT && type != ChannelType.VOICE) {
-            throw new IllegalArgumentException("Channel type must be either TEXT or VOICE");
+        if (createChannelDTO.type() != ChannelType.TEXT && createChannelDTO.type() != ChannelType.VOICE) {
+            throw new ValidationException("type: must be either TEXT or VOICE");
         }
 
-        permissionService.hasPermissionsThrow(currentUser.getId(), category.getId(), Permission.MANAGE_CHANNELS);
+        permissionService.hasPermissionsThrow(currentUser.getId(), hubId, Permission.MANAGE_CHANNELS);
 
         Channel channel = Channel.builder()
                 .categoryId(category.getId())
-                .type(type)
+                .type(createChannelDTO.type())
                 .owner(currentUser)
                 .name(createChannelDTO.name())
                 .position(channelService.getLastPosition(category.getId()))
@@ -54,13 +53,20 @@ public class ChannelCreationService {
     public ChannelDTO createDirectChannel(CreateDirectChannelDTO createChannelDTO, User currentUser) {
         Channel channel;
 
-        if (createChannelDTO.members().size() == 1 &&
-                !createChannelDTO.members().get(0).equals(currentUser.getId())
-        ) {
+        createChannelDTO.members().add(currentUser.getId());
+
+        long countMembers = createChannelDTO.members().stream().distinct().count();
+
+        // check member ids greater than 2 and all ids are positive
+        if (countMembers < 2 || !createChannelDTO.members().stream().allMatch(num -> num >= 0)) {
+            throw new ValidationException("members: count must be greater than 2 or equals and ids greater than 0");
+        }
+
+        // if members = 2 - Direct Chat, if more - Group Direct Chat
+        if (countMembers == 2) {
             channel = channelRepository.findDirectChannelByMemberIds(currentUser.getId(), createChannelDTO.members().get(0))
                     .orElseGet(() -> createDirectOrGroupChannel(createChannelDTO.members(), ChannelType.DC));
         } else {
-            createChannelDTO.members().add(currentUser.getId());
             channel = createDirectOrGroupChannel(createChannelDTO.members(), ChannelType.GROUP_DC);
         }
 
@@ -69,7 +75,7 @@ public class ChannelCreationService {
 
     private Channel createDirectOrGroupChannel(List<Long> memberIds, ChannelType type) {
         if (type != ChannelType.GROUP_DC && type != ChannelType.DC) {
-            throw new IllegalArgumentException("Channel type must be either DC or GROUP_DC");
+            throw new ValidationException("type: must be either DC or GROUP_DC");
         }
 
         Channel channel = Channel.builder()

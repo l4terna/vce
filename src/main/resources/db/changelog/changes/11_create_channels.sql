@@ -8,7 +8,7 @@ CREATE TABLE channels (
     position INTEGER,
     name VARCHAR(255),
     type VARCHAR(32) NOT NULL,
-    created_at TIMESTAMP NOT NULL,
-    last_modified_at TIMESTAMP NOT NULL
+    created_at TIMESTAMPTZ NOT NULL,
+    last_modified_at TIMESTAMPTZ NOT NULL
 );
 -- rollback DROP TABLE channels;

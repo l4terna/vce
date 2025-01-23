@@ -34,8 +34,10 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             FilterChain filterChain
     ) throws ServletException, IOException {
         try {
+            // TODO: ПОЧИНИТЬ ТУТ ВСЁ
             String authHeader = request.getHeader("Authorization");
-            String fingerprint = userSessionService.getFingerprint();
+//            String fingerprint = userSessionService.getFingerprint();
+            String fingerprint = "string";
 
             if (request.getRequestURI().contains("/auth/login") ||
                     request.getRequestURI().contains("/auth/register") ||
@@ -44,7 +46,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                 return;
             }
 
-            if (StringUtils.isEmpty(authHeader) || !authHeader.startsWith("Bearer ") || fingerprint == null) {
+            if (StringUtils.isEmpty(authHeader) || !authHeader.startsWith("Bearer ")) {
                 throw new JwtException("Invalid credentials");
             }
 

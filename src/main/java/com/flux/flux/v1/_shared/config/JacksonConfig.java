@@ -9,6 +9,9 @@ import com.flux.flux.v1._shared.jackson.StringEmptyToNullModule;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import java.time.ZoneOffset;
+import java.util.TimeZone;
+
 @Configuration
 public class JacksonConfig {
    
@@ -20,6 +23,7 @@ public class JacksonConfig {
            .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
            .setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE)
            .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
-           .enable(DeserializationFeature.ACCEPT_EMPTY_STRING_AS_NULL_OBJECT);
+           .enable(DeserializationFeature.ACCEPT_EMPTY_STRING_AS_NULL_OBJECT)
+           .setTimeZone(TimeZone.getTimeZone(ZoneOffset.UTC));
    }
 }

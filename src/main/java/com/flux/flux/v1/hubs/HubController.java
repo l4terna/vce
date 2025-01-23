@@ -1,6 +1,7 @@
 package com.flux.flux.v1.hubs;
 
 import com.flux.flux.v1._shared.model.dto.PageableDTO;
+import com.flux.flux.v1.channel.dto.HubEntitiesDTO;
 import com.flux.flux.v1.hubs.dto.CreateHubDTO;
 import com.flux.flux.v1.hubs.dto.HubDTO;
 import com.flux.flux.v1.hubs.dto.UpdateHubDTO;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.*;
 public class HubController {
     private final HubService hubService;
     private final HubCreationService hubCreationService;
+    private final HubEntitiesService hubEntitiesService;
 
     @GetMapping
     public ResponseEntity<Page<HubDTO>> getAllHubs(@ModelAttribute PageableDTO pageableDTO) {
@@ -61,5 +63,11 @@ public class HubController {
     ) {
         hubService.delete(id, user);
         return ResponseEntity.noContent().build();
+    }
+
+
+    @GetMapping("/{id}/entities")
+    public ResponseEntity<HubEntitiesDTO> getHubEntities(@PathVariable Long id) {
+        return ResponseEntity.ok(hubEntitiesService.getHubEntities(id));
     }
 }

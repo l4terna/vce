@@ -6,7 +6,7 @@ import lombok.*;
 import lombok.experimental.SuperBuilder;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 @Entity
 @Table(name = "tokens")
@@ -27,7 +27,7 @@ public class Token extends BaseEntity {
     private Boolean isRevoked = false;
 
     @Column(nullable = false)
-    private LocalDateTime expiresAt;
+    private Instant expiresAt;
 
 
 }

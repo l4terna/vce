@@ -7,7 +7,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
@@ -15,7 +15,9 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "hub_members")
+@Table(name = "hub_members",
+        uniqueConstraints = @UniqueConstraint(columnNames = {"hub_id", "user_id"})
+)
 public class HubMember extends IdEntity {
     @ManyToOne
     @JoinColumn(name = "hub_id")
@@ -27,5 +29,5 @@ public class HubMember extends IdEntity {
 
     @Builder.Default
     @Column(name = "joined_at")
-    private LocalDateTime joinedAt = LocalDateTime.now();
+    private Instant joinedAt = Instant.now();
 }

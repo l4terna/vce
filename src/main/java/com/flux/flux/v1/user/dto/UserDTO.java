@@ -1,11 +1,11 @@
 package com.flux.flux.v1.user.dto;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 public record UserDTO(
         Long id,
         String login,
         String email,
-        LocalDateTime createdAt
+        Instant createdAt
 ) {
 }

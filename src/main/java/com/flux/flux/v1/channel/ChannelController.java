@@ -19,15 +19,7 @@ public class ChannelController {
     private final ChannelService channelService;
     private final ChannelCreationService channelCreationService;
 
-    @PostMapping("/hub")
-    public ResponseEntity<ChannelDTO> createHubChannel(
-            @Valid @RequestBody CreateHubChannelDTO createChannelDTO,
-            @AuthenticationPrincipal User user
-    ) {
-        return ResponseEntity.ok(channelCreationService.createHubChannel(createChannelDTO, user));
-    }
-
-    @PostMapping("/direct")
+    @PostMapping
     public ResponseEntity<ChannelDTO> createDirectChannel(
             @Valid @RequestBody CreateDirectChannelDTO createChannelDTO,
             @AuthenticationPrincipal User user

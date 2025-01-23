@@ -2,14 +2,14 @@ package com.flux.flux.v1.usersession.dto;
 
 import lombok.Builder;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 @Builder
 public record UserSessionDTO(
         Long id,
         String deviceInfo,
         String ipAddress,
-        LocalDateTime lastActivity,
+        Instant lastActivity,
         Boolean isActive
 ) {
 }

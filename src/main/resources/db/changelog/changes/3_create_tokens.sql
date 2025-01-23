@@ -6,9 +6,9 @@ CREATE TABLE tokens (
     token VARCHAR NOT NULL,
     type VARCHAR(10) NOT NULL,
     is_revoked BOOLEAN NOT NULL DEFAULT false,
-    expires_at TIMESTAMP NOT NULL,
+    expires_at TIMESTAMPTZ NOT NULL,
     user_session_id BIGINT REFERENCES user_sessions(id),
-    created_at TIMESTAMP NOT NULL,
-    last_modified_at TIMESTAMP NOT NULL
+    created_at TIMESTAMPTZ NOT NULL,
+    last_modified_at TIMESTAMPTZ NOT NULL
 );
 -- rollback DROP TABLE IF EXISTS tokens;

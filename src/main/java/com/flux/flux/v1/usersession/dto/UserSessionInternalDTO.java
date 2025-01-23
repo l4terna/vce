@@ -3,7 +3,7 @@ package com.flux.flux.v1.usersession.dto;
 import com.flux.flux.v1.user.User;
 import lombok.Builder;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 @Builder
 public record UserSessionInternalDTO(
@@ -12,5 +12,5 @@ public record UserSessionInternalDTO(
     String deviceInfo,
     String ipAddress,
     String fingerprint,
-    LocalDateTime lastActivity
+    Instant lastActivity
 ) {}

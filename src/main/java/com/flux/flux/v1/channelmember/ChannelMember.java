@@ -8,7 +8,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
@@ -16,7 +16,9 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "channel_members")
+@Table(name = "channel_members",
+    uniqueConstraints = @UniqueConstraint(columnNames = {"message_id", "user_id"})
+)
 public class ChannelMember extends IdEntity {
     @ManyToOne
     @JoinColumn(name = "channel_id")
@@ -28,5 +30,5 @@ public class ChannelMember extends IdEntity {
 
     @Builder.Default
     @Column(name = "joined_at")
-    private LocalDateTime joinedAt = LocalDateTime.now();
+    private Instant joinedAt = Instant.now();
 }

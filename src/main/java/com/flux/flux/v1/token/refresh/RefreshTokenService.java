@@ -1,24 +1,22 @@
 package com.flux.flux.v1.token.refresh;
 
 import com.flux.flux.v1._shared.security.jwt.JwtService;
-import com.flux.flux.v1.token.shared.TokenMapper;
 import com.flux.flux.v1.token.shared.TokenService;
 import com.flux.flux.v1.token.shared.dto.CreateTokenDTO;
 import com.flux.flux.v1.user.User;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 @Service
 public class RefreshTokenService extends TokenService<RefreshToken> {
     private final JwtService jwtService;
 
     public RefreshTokenService(
-            TokenMapper<RefreshToken> tokenMapper,
             RefreshTokenRepository tokenRepository,
             JwtService jwtService) {
-        super(tokenMapper, tokenRepository);
+        super(tokenRepository);
         this.jwtService = jwtService;
     }
 
@@ -33,7 +31,7 @@ public class RefreshTokenService extends TokenService<RefreshToken> {
     }
 
     @Override
-    protected RefreshToken createTokenEntity(CreateTokenDTO dto, LocalDateTime expiresAt) {
+    protected RefreshToken createTokenEntity(CreateTokenDTO dto, Instant expiresAt) {
         return RefreshToken.builder()
                 .userSession(dto.userSession())
                 .token(dto.token())
@@ -47,7 +45,7 @@ public class RefreshTokenService extends TokenService<RefreshToken> {
                 .orElseThrow(() -> new EntityNotFoundException("Token not found"));
 
         return token.getUserSession().getFingerprint().equals(fingerprint)
-                && token.getExpiresAt().isAfter(LocalDateTime.now())
+                && token.getExpiresAt().isAfter(Instant.now())
                 && !token.getIsRevoked();
     }
 

@@ -1,6 +1,6 @@
 package com.flux.flux.v1.invite.dto;
 
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 
 public record InviteDTO (
         Long id,
@@ -8,6 +8,6 @@ public record InviteDTO (
         Integer maxUses,
         Integer currentUses,
         Boolean isActive,
-        LocalDateTime expiresAt
+        OffsetDateTime expiresAt
 ) {
 }

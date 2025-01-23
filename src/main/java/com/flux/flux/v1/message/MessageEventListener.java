@@ -14,16 +14,16 @@ public class MessageEventListener {
 
     @EventListener
     public void handleMessageCreated(MessageCreatedEvent event) {
-        messageWebSocketService.notifyMessageCreated(event.message(), event.channelId());
+        messageWebSocketService.messageCreated(event.message(), event.channelId());
     }
 
     @EventListener
     public void handleMessageUpdated(MessageUpdatedEvent event) {
-        messageWebSocketService.notifyMessageUpdated(event.message(), event.channelId());
+        messageWebSocketService.messageUpdated(event.message(), event.channelId());
     }
 
     @EventListener
     public void handleMessageDeleted(MessageDeletedEvent event) {
-        messageWebSocketService.notifyMessageDeleted(event.messageId(), event.channelId());
+        messageWebSocketService.messageDeleted(event.messageId(), event.channelId());
     }
 }

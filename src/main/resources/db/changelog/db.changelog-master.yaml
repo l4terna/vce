@@ -23,3 +23,5 @@ databaseChangeLog:
       file: db/changelog/changes/12_create_channel_members.sql
   - include:
       file: db/changelog/changes/13_create_messages.sql
+  - include:
+      file: db/changelog/changes/14_create_message_read_statuses.sql

@@ -1,5 +1,6 @@
 package com.flux.flux.v1._shared.exception.handler;
 
+import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import com.flux.flux.v1._shared.exception.EntityAlreadyExistsException;
 import com.flux.flux.v1._shared.exception.ErrorResponse;
 import com.flux.flux.v1._shared.exception.enumeration.ErrorType;
@@ -10,15 +11,18 @@ import jakarta.validation.ValidationException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.web.servlet.error.ErrorController;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestControllerAdvice
 @RequiredArgsConstructor
@@ -62,35 +66,42 @@ public class GlobalExceptionHandler implements ErrorController {
             MethodArgumentNotValidException.class,
             ValidationException.class,
             ConstraintViolationException.class,
-            MethodArgumentTypeMismatchException.class
+            MethodArgumentTypeMismatchException.class,
+            HttpMessageNotReadableException.class
     })
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handleValidationErrors(Exception ex) {
-        List<String> errors = null;
-
         if (ex instanceof MethodArgumentNotValidException validationEx) {
-            errors = validationEx.getBindingResult()
+            List<String> errors = validationEx.getBindingResult()
                     .getFieldErrors()
                     .stream()
                     .map(error -> error.getField() + ": " + error.getDefaultMessage())
                     .toList();
-        }
-        else if (ex instanceof ValidationException) {
-            errors = List.of(ex.getMessage());
-        }
-        else {
+
             return createErrorResponse(
                     ErrorType.VALIDATION_ERROR,
-                    ex.getMessage(),
+                    errors,
+                    HttpStatus.BAD_REQUEST.value()
+            );
+        } else if (ex instanceof HttpMessageNotReadableException) {
+            return createErrorResponse(
+                    ErrorType.VALIDATION_ERROR,
+                    "Invalid request format",
+                    HttpStatus.BAD_REQUEST.value()
+            );
+        } else if (ex instanceof ValidationException validationEx) {
+            return createErrorResponse(
+                    ErrorType.VALIDATION_ERROR,
+                    List.of(validationEx.getMessage()),
+                    HttpStatus.BAD_REQUEST.value()
+            );
+        } else {
+            return createErrorResponse(
+                    ErrorType.VALIDATION_ERROR,
+                    "Bad request",
                     HttpStatus.BAD_REQUEST.value()
             );
         }
-
-        return createErrorResponse(
-                ErrorType.VALIDATION_ERROR,
-                errors,
-                HttpStatus.BAD_REQUEST.value()
-        );
     }
 
     @ExceptionHandler(Exception.class)

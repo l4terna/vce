@@ -6,7 +6,7 @@ CREATE TABLE categories (
     hub_id BIGINT REFERENCES hubs(id) ON DELETE CASCADE NOT NULL,
     name VARCHAR(50) NOT NULL,
     position INTEGER NOT NULL,
-    created_at TIMESTAMP NOT NULL,
-    last_modified_at TIMESTAMP NOT NULL
+    created_at TIMESTAMPTZ NOT NULL,
+    last_modified_at TIMESTAMPTZ NOT NULL
 );
 -- rollback DROP TABLE categories;

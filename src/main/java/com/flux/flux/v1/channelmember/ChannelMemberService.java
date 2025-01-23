@@ -6,6 +6,7 @@ import com.flux.flux.v1.channelmember.dto.CreateChannelMemberDTO;
 import com.flux.flux.v1.user.User;
 import com.flux.flux.v1.user.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -43,7 +44,25 @@ public class ChannelMemberService {
     }
 
     @Transactional
-    public void delete(Long channelId, Long memberId) {
+    public void delete(Long channelId, Long memberId, User currentUser) {
         Channel channel = channelService.findChannelById(channelId);
+
+        if (!channel.getOwner().getId().equals(currentUser.getId())) {
+            throw new AccessDeniedException("Permission denied");
+        }
+
+        channelMemberRepository.deleteById(memberId);
+    }
+
+    @Transactional(readOnly = true)
+    public boolean isMember(Long channelId, Long userId) {
+        return channelMemberRepository.existsByIdAndUserId(channelId, userId);
+    }
+
+    @Transactional(readOnly = true)
+    public void isMemberThrow(Long channelId, Long userId) {
+        if (!isMember(channelId, userId)) {
+            throw new AccessDeniedException("Permissions denied");
+        }
     }
 }

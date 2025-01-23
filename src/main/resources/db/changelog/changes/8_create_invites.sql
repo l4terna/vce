@@ -6,11 +6,11 @@ CREATE TABLE invites (
     hub_id BIGINT REFERENCES hubs(id) ON DELETE CASCADE NOT NULL,
     created_by_id BIGINT REFERENCES users(id) ON DELETE CASCADE NOT NULL,
     code VARCHAR(10) NOT NULL UNIQUE,
-    expires_at TIMESTAMP NOT NULL,
+    expires_at TIMESTAMPTZ NOT NULL,
     max_uses INTEGER,
     current_uses INTEGER NOT NULL DEFAULT 0,
     is_active BOOLEAN DEFAULT true,
-    created_at TIMESTAMP NOT NULL,
-    last_modified_at TIMESTAMP NOT NULL
+    created_at TIMESTAMPTZ NOT NULL,
+    last_modified_at TIMESTAMPTZ NOT NULL
 );
 -- rollback DROP TABLE invites;

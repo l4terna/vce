@@ -7,7 +7,7 @@ CREATE TABLE roles (
     name VARCHAR(255) NOT NULL,
     permissions TEXT NOT NULL,
     color VARCHAR(7) NOT NULL,
-    created_at TIMESTAMP NOT NULL,
-    last_modified_at TIMESTAMP NOT NULL
+    created_at TIMESTAMPTZ NOT NULL,
+    last_modified_at TIMESTAMPTZ NOT NULL
 );
 -- rollback DROP TABLE roles;

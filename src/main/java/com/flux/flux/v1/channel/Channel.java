@@ -2,6 +2,7 @@ package com.flux.flux.v1.channel;
 
 import com.flux.flux.v1._shared.model.entity.BaseEntity;
 import com.flux.flux.v1.channel.enumeration.ChannelType;
+import com.flux.flux.v1.channelmember.ChannelMember;
 import com.flux.flux.v1.user.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -9,6 +10,9 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
@@ -24,6 +28,9 @@ public class Channel extends BaseEntity {
 
     @Column(name = "category_id")
     private Long categoryId;
+
+    @OneToMany(mappedBy = "channel")
+    private List<ChannelMember> members = new ArrayList<>();
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)

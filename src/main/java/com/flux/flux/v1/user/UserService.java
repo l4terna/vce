@@ -73,7 +73,10 @@ public class UserService {
     }
 
     @Transactional(readOnly = true)
-    public UserProfileDTO getProfile(Long id, GetUserFilter filter) {
+    public UserProfileDTO getProfile(
+            Long id,
+            GetUserFilter filter
+    ) {
         HubMemberDTO hubMemberDTO = null;
 
         UserDTO userDTO = userRepository.findById(id)

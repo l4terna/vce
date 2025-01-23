@@ -6,7 +6,8 @@ import com.flux.flux.v1.user.User;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
-import java.time.LocalDateTime;
+
+import java.time.OffsetDateTime;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
@@ -31,7 +32,7 @@ public class Invite extends BaseEntity {
     private Boolean isActive = true;
 
     @Column(nullable = false)
-    private LocalDateTime expiresAt;
+    private OffsetDateTime expiresAt;
 
     @ManyToOne
     @JoinColumn(name = "hub_id")

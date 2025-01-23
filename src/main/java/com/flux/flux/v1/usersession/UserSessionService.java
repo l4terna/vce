@@ -15,7 +15,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.Arrays;
 
 
@@ -32,7 +32,7 @@ public class UserSessionService {
     public UserSession create(CreateUserSessionDTO createDTO, String fingerprint) {
         UserSession session =  UserSession.builder()
                 .user(createDTO.user())
-                .lastActivity(LocalDateTime.now())
+                .lastActivity(Instant.now())
                 .deviceInfo(getDeviceInfo())
                 .ipAddress(getClientIpAddress())
                 .fingerprint(fingerprint)

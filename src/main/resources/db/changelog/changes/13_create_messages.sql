@@ -6,7 +6,7 @@ CREATE TABLE messages (
     author_id BIGINT REFERENCES users(id) NOT NULL,
     channel_id BIGINT REFERENCES channels(id) ON DELETE CASCADE NOT NULL,
     content TEXT,
-    created_at TIMESTAMP NOT NULL,
-    last_modified_at TIMESTAMP NOT NULL
+    created_at TIMESTAMPTZ NOT NULL,
+    last_modified_at TIMESTAMPTZ NOT NULL
 );
 -- rollback DROP TABLE messages;
