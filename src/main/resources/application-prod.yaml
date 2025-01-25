@@ -4,7 +4,7 @@ spring:
 
   datasource:
     driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://localhost:5433/flux?reWriteBatchedInserts=true
+    url: jdbc:postgresql://database:5432/flux?reWriteBatchedInserts=true
     username: postgres
     password: postgres
 
@@ -16,8 +16,8 @@ spring:
   data:
     redis:
       password: redis
-      host: localhost
-      port: 6380
+      host: redis
+      port: 6379
 
 app:
   cors:

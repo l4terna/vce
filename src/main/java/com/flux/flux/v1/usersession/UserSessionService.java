@@ -114,7 +114,7 @@ public class UserSessionService {
 
     @Transactional(readOnly = true)
     public Page<UserSessionDTO> getUserSessions(PageableDTO pageableDTO, User currentUser) {
-        return userSessionRepository.findAllAnotherActiveSessions(pageableDTO.toPageable(), findUserSessionByUser(currentUser))
+        return userSessionRepository.findAllAnotherActiveSessions(pageableDTO.toPageable(), findUserSessionByUserId(currentUser.getId()))
                 .map(userSessionMapper::toDTO);
     }
 
@@ -133,14 +133,28 @@ public class UserSessionService {
 
     @Transactional
     public void deactivateAllOtherUserSessions(User currentUser) {
-        UserSession userSession = findUserSessionByUser(currentUser);
+        UserSession userSession = findUserSessionByUserId(currentUser.getId());
         userSessionRepository.deactivateAllOtherSessions(userSession);
     }
 
     @Transactional(readOnly = true)
-    public UserSession findUserSessionByUser(User user) {
+    public UserSession findUserSessionByUserId(Long userId) {
         String fingerprint = getFingerprint();
-        return userSessionRepository.findActiveByFingerprintAndUser(fingerprint, user)
+        return userSessionRepository.findActiveByFingerprintAndUserId(fingerprint, userId)
                 .orElseThrow(() -> new EntityNotFoundException("Session not found"));
+    }
+
+    @Transactional
+    public void updateLastActivity(Long userId, String fingerprint, Instant lastActivity) {
+        UserSession session = userSessionRepository.findActiveByFingerprintAndUserId(fingerprint, userId)
+                .orElseThrow(() -> new EntityNotFoundException("Session not found"));
+
+        session.setLastActivity(lastActivity);
+        userSessionRepository.save(session);
+    }
+
+    @Transactional(readOnly = true)
+    public Instant getLastActivity(Long userId) {
+        return userSessionRepository.findMaxLastActivityByUserId(userId).orElse(Instant.now());
     }
 }
