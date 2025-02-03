@@ -1,29 +1,30 @@
-package com.flux.flux.v1.message;
+package com.flux.flux.v1.message.listener;
 
 import com.flux.flux.v1.message.event.MessageCreatedEvent;
 import com.flux.flux.v1.message.event.MessageDeletedEvent;
 import com.flux.flux.v1.message.event.MessageUpdatedEvent;
+import com.flux.flux.v1.message.messaging.MessageProducer;
 import lombok.RequiredArgsConstructor;
-import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.event.TransactionalEventListener;
 
 @Component
 @RequiredArgsConstructor
 public class MessageEventListener {
-    private final MessageWebSocketService messageWebSocketService;
+    private final MessageProducer messageProducer;
 
-    @EventListener
+    @TransactionalEventListener
     public void handleMessageCreated(MessageCreatedEvent event) {
-        messageWebSocketService.messageCreated(event.message(), event.channelId());
+        messageProducer.sendCreated(event);
     }
 
-    @EventListener
+    @TransactionalEventListener
     public void handleMessageUpdated(MessageUpdatedEvent event) {
-        messageWebSocketService.messageUpdated(event.message(), event.channelId());
+        messageProducer.sendUpdated(event);
     }
 
-    @EventListener
+    @TransactionalEventListener
     public void handleMessageDeleted(MessageDeletedEvent event) {
-        messageWebSocketService.messageDeleted(event.messageId(), event.channelId());
+        messageProducer.sendDeleted(event);
     }
 }

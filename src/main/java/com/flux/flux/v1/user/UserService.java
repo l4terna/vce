@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -91,5 +92,10 @@ public class UserService {
                 .user(userDTO)
                 .hubMember(hubMemberDTO)
                 .build();
+    }
+
+    @Transactional(readOnly = true)
+    public Set<Long> findUserIdsByEmails(Set<String> emails) {
+        return userRepository.findUserIdsByEmails(emails);
     }
 }

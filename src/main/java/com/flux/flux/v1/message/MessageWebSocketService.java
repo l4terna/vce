@@ -2,54 +2,93 @@ package com.flux.flux.v1.message;
 
 import com.flux.flux.v1._shared.websocket.dto.WebSocketMessage;
 import com.flux.flux.v1.message.dto.MessageDTO;
+import com.flux.flux.v1.messagestatus.MessageReadStatusService;
+import com.flux.flux.v1.messagestatus.enumeration.MessageStatus;
+import com.flux.flux.v1.user.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.messaging.simp.user.SimpUser;
+import org.springframework.messaging.simp.user.SimpUserRegistry;
 import org.springframework.stereotype.Service;
 
 import java.util.Set;
+import java.util.stream.Collectors;
+
 
 @Service
 @RequiredArgsConstructor
 public class MessageWebSocketService {
     private final SimpMessagingTemplate messagingTemplate;
+    private final SimpUserRegistry simpUserRegistry;
+    private final UserService userService;
+    private final MessageReadStatusService messageReadStatusService;
 
-    public void messageCreated(MessageDTO message, Long channelId) {
-//        for (Long memberId : channelMemberIds) {
-//            boolean isRead = memberId.equals(message.author().id());
-
-            WebSocketMessage wsMessage = WebSocketMessage.builder("MESSAGE_CREATE")
-                    .add("id", message.id())
-                    .add("author", message.author())
-                    .add("content", message.content())
-                    .add("created_at", message.createdAt())
-                    .add("channelId", channelId)
-                    .build();
-
-            send(channelId, wsMessage);
-
-//            messagingTemplate.convertAndSendToUser(
-//                    memberId.toString(),
-//                    "/topic/channels/" + channelId + "/messages",
-//                    wsMessage
-//            );
-//        }
+    private Set<String> getActiveWebSocketUsers(Long channelId) {
+        return simpUserRegistry.getUsers().stream()
+                .filter(user -> user.getSessions()
+                        .stream()
+                        .anyMatch(session -> session.getSubscriptions()
+                                .stream()
+                                .anyMatch(sub ->
+                                        sub.getDestination().endsWith("/channels/" + channelId +"/messages")))
+                )
+                .map(SimpUser::getName)
+                .collect(Collectors.toSet());
     }
 
-    public void messageUpdated(MessageDTO message, Long channelId) {
-        WebSocketMessage wsMessage = WebSocketMessage.builder("MESSAGE_UPDATE")
-                .add("id", message.id())
-                .add("author", message.author())
-                .add("content", message.content())
-                .add("created_at", message.createdAt())
-                .add("channelId", channelId)
-                .build();
+    public void messageCreated(MessageDTO message) {
+        Set<Long> userIds = userService.findUserIdsByEmails(getActiveWebSocketUsers(message.channelId()));
+        Set<Long> userReadStatus = messageReadStatusService.findReadStatusesByMessageIdAndUserIds(message.id(), userIds);
 
-        send(channelId, wsMessage);
+        userIds.forEach(userId -> {
+            MessageDTO messageWithStatus = computeMessageDTOWithStatus(message, userId, userReadStatus);
+
+            WebSocketMessage wsMessage = WebSocketMessage.builder("MESSAGE_CREATE")
+                    .add("message", messageWithStatus)
+                    .build();
+
+            send(userId.toString(), message.channelId(), wsMessage);
+        });
+
+    }
+
+    public void messageUpdated(MessageDTO message) {
+        Set<Long> userIds = userService.findUserIdsByEmails(getActiveWebSocketUsers(message.channelId()));
+
+        Set<Long> userReadStatus = messageReadStatusService.findReadStatusesByMessageIdAndUserIds(message.id(), userIds);
+
+        userIds.forEach(userId -> {
+            MessageDTO messageWithStatus = computeMessageDTOWithStatus(message, userId, userReadStatus);
+
+            WebSocketMessage wsMessage = WebSocketMessage.builder("MESSAGE_UPDATE")
+                    .add("message", messageWithStatus)
+                    .build();
+
+            send(userId.toString(), message.channelId(), wsMessage);
+        });
+    }
+
+    private MessageDTO computeMessageDTOWithStatus(MessageDTO message, Long userId, Set<Long> userReadStatus) {
+        if (userId.equals(message.author().id())) {
+            Integer status = userReadStatus.isEmpty() ? MessageStatus.SENT.getValue() : MessageStatus.READ.getValue();
+
+            return message.toBuilder()
+                    .status(status)
+                    .readByCount((long) userReadStatus.size())
+                    .build();
+        } else {
+            Integer status = userReadStatus.contains(userId) ? MessageStatus.READ.getValue() : MessageStatus.NEW.getValue();
+
+            return message.toBuilder()
+                    .status(status)
+                    .readByCount(null)
+                    .build();
+        }
     }
 
     public void messageDeleted(Long messageId, Long channelId) {
         WebSocketMessage wsMessage = WebSocketMessage.builder("MESSAGE_DELETE")
-                .add("id", messageId)
+                .add("messageId", messageId)
                 .add("channelId", channelId)
                 .build();
 
@@ -59,6 +98,14 @@ public class MessageWebSocketService {
     private void send(Long channelId, WebSocketMessage message) {
         messagingTemplate.convertAndSend(
                 "/topic/channels/" + channelId + "/messages",
+                message
+        );
+    }
+
+    private void send(String userId, Long channelId, WebSocketMessage message) {
+        messagingTemplate.convertAndSendToUser(
+                userId,
+                "/queue/channels/" + channelId + "/messages",
                 message
         );
     }

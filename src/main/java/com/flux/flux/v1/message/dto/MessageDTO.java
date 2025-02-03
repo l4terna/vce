@@ -5,13 +5,15 @@ import lombok.Builder;
 
 import java.time.Instant;
 
-@Builder
+@Builder(toBuilder = true)
 public record MessageDTO(
         Long id,
         String content,
         Instant createdAt,
+        Instant lastModifiedAt,
         UserDTO author,
-        Boolean isRead, // only for DC channels
+        Long channelId,
+        Integer status,
         Long readByCount // only for GROUP_DC, TEXT channels
 ) {
 }

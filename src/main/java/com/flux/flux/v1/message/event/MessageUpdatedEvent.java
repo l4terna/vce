@@ -7,5 +7,5 @@ import lombok.Builder;
 public record MessageUpdatedEvent(
         MessageDTO message,
         Long channelId
-) {
+) implements MessageEvent {
 }

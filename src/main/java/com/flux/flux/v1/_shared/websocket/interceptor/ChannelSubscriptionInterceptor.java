@@ -39,30 +39,36 @@ public class ChannelSubscriptionInterceptor implements ChannelInterceptor {
         if (accessor != null && StompCommand.SUBSCRIBE.equals(accessor.getCommand())) {
             String destination = accessor.getDestination();
             if (destination != null && destination.startsWith("/topic/channels/")) {
-                Principal principal = accessor.getUser();
-
-                if (principal == null) {
-                    throw new AccessDeniedException("No authentication data found");
-                }
-
-                User user = userService.findUserByEmail(principal.getName());
-
-                Long channelId = extractChannelId(destination);
-                Channel channel = channelService.findChannelById(channelId);
+                User user = extractUser(accessor);
+                Channel channel = extractChannel(user, destination);
 
                 if ((channel.getType() == ChannelType.DC || channel.getType() == ChannelType.GROUP_DC)) {
-                    channelMemberService.isMemberThrow(channelId, user.getId());
+                    channelMemberService.isMemberThrow(channel.getId(), user.getId());
                 } else {
-                    Hub hub = hubService.findHubByChannelId(channelId);
+                    Hub hub = hubService.findHubByChannelId(channel.getId());
                     permissionService.hasPermissionsThrow(user.getId(), hub.getId(), Permission.SEND_MESSAGES);
                 }
             }
         }
+
         return message;
     }
 
-    private Long extractChannelId(String destination) {
+    private User extractUser(StompHeaderAccessor accessor) {
+        Principal principal = accessor.getUser();
+
+        if (principal == null) {
+            throw new AccessDeniedException("No authentication data found");
+        }
+
+        return userService.findUserByEmail(principal.getName());
+    }
+
+    private Channel extractChannel(User user, String destination) {
         String[] parts = destination.split("/");
-        return Long.valueOf(parts[3]);
+
+        Long channelId = Long.valueOf(parts[3]);
+
+        return channelService.findChannelById(channelId);
     }
 }

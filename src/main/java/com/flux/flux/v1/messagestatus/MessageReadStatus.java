@@ -1,4 +1,4 @@
-package com.flux.flux.v1.messageread;
+package com.flux.flux.v1.messagestatus;
 
 import com.flux.flux.v1._shared.model.entity.IdEntity;
 import com.flux.flux.v1.message.Message;
@@ -6,6 +6,7 @@ import com.flux.flux.v1.user.User;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
+import org.springframework.data.annotation.LastModifiedDate;
 
 import java.time.Instant;
 
@@ -27,5 +28,6 @@ public class MessageReadStatus extends IdEntity {
     @JoinColumn(name = "message_id", nullable = false)
     private Message message;
 
-    private Instant readAt;
+    @Builder.Default
+    private Instant readAt = Instant.now();
 }

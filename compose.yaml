@@ -13,7 +13,7 @@ services:
     networks:
       - spring-network
 
-  redis_c:
+  redis:
     container_name: redis
     image: redis:latest
     ports:
@@ -29,6 +29,40 @@ services:
     networks:
       - spring-network
 
+  kafka:
+    image: confluentinc/cp-kafka:latest
+    hostname: kafka
+    container_name: kafka
+    volumes:
+      - kafka-data:/kafka/data
+    ports:
+      - "9092:9092"
+    environment:
+      # Основные настройки KRaft
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: 'broker,controller'
+      # Настройка кворума для одного узла (1@kafka:29093)
+      KAFKA_CONTROLLER_QUORUM_VOTERS: '1@kafka:29093'
+
+      # Настройка слушателей
+      # CONTROLLER - для внутреннего управления кластером
+      # PLAINTEXT - для клиентских подключений
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092,CONTROLLER://0.0.0.0:29093
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
+
+      # Дополнительные настройки для режима разработки
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+
+      # Важные настройки для KRaft
+      KAFKA_INTER_BROKER_LISTENER_NAME: 'PLAINTEXT'
+      KAFKA_CONTROLLER_LISTENER_NAMES: 'CONTROLLER'
+      # Отключаем ZooKeeper
+      CLUSTER_ID: 'ciWo7IWazngRchmPES6q5A=='
+
 networks:
   spring-network:
     driver: bridge
@@ -36,3 +70,4 @@ networks:
 volumes:
   postgres-data:
   redis-data:
+  kafka-data:

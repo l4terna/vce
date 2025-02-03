@@ -12,12 +12,12 @@ import com.flux.flux.v1.message.dto.UpdateMessageDTO;
 import com.flux.flux.v1.message.event.MessageCreatedEvent;
 import com.flux.flux.v1.message.event.MessageDeletedEvent;
 import com.flux.flux.v1.message.event.MessageUpdatedEvent;
-import com.flux.flux.v1.messageread.MessageReadStatusService;
+import com.flux.flux.v1.messagestatus.MessageReadStatusService;
+import com.flux.flux.v1.messagestatus.enumeration.MessageStatus;
 import com.flux.flux.v1.permission.PermissionService;
 import com.flux.flux.v1.permission.enumeration.Permission;
 import com.flux.flux.v1.user.User;
 import jakarta.persistence.EntityNotFoundException;
-import jakarta.validation.ValidationException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
@@ -63,9 +63,9 @@ public class MessageService {
         MessageDTO newMessageDTO;
 
         if (channel.getType() == ChannelType.DC) {
-            newMessageDTO = messageMapper.toDTO(messageRepository.save(message), false);
+            newMessageDTO = messageMapper.toDTO(messageRepository.save(message), MessageStatus.SENT);
         } else if (channel.getType() == ChannelType.GROUP_DC || channel.getType() == ChannelType.TEXT) {
-            newMessageDTO = messageMapper.toDTO(messageRepository.save(message), false, 0);
+            newMessageDTO = messageMapper.toDTO(messageRepository.save(message), MessageStatus.SENT, 0);
         } else {
             newMessageDTO = messageMapper.toDTO(messageRepository.save(message));
         }
@@ -75,7 +75,6 @@ public class MessageService {
         return newMessageDTO;
     }
 
-    // TODO: НОРМАЛИЗОВАТЬ СТАТУС ПРОЧТЕНИЯ ПРИ ВЫВОДЕ ПОСЛЕ АПДЕЙТА
     @Transactional
     public MessageDTO update(Long channelId, Long messageId, UpdateMessageDTO updateMessageDTO, User currentUser) {
         Message message = findMessageById(messageId);
@@ -88,17 +87,24 @@ public class MessageService {
         boolean hasChanges = !message.getContent().equals(updateMessageDTO.content());
 
         if (!hasChanges) {
-            return messageMapper.toDTO(message);
+            return computeUpdateMessageDTOWithStatus(message);
         }
 
         message.setContent(updateMessageDTO.content());
 
         Message savedMessage = messageRepository.save(message);
-        MessageDTO updatedMessageDTO = messageMapper.toDTO(savedMessage);
+
+        MessageDTO updatedMessageDTO = computeUpdateMessageDTOWithStatus(savedMessage);
 
         eventPublisher.publishEvent(new MessageUpdatedEvent(updatedMessageDTO, channelId));
 
         return updatedMessageDTO;
+    }
+
+    private MessageDTO computeUpdateMessageDTOWithStatus(Message message) {
+        long count = messageReadStatusService.countReadStatusesByMessageId(message.getId());
+        MessageStatus status = count > 0 ? MessageStatus.READ : MessageStatus.SENT;
+        return messageMapper.toDTO(message, status, count);
     }
 
     @Transactional(readOnly = true)
@@ -116,9 +122,8 @@ public class MessageService {
             throw new AccessDeniedException("Permission denied");
         }
 
-        Hub hub = hubService.findHubByChannelId(message.getChannel().getId());
-
         if (message.getChannel().getType() == ChannelType.VOICE || message.getChannel().getType() == ChannelType.TEXT) {
+            Hub hub = hubService.findHubByChannelId(message.getChannel().getId());
             permissionService.hasPermissionsThrow(currentUser.getId(), hub.getId(), Permission.SEND_MESSAGES);
         }
 
@@ -160,15 +165,18 @@ public class MessageService {
         List<Long> messageIds = messages.stream().map(Message::getId).toList();
 
         Set<Long> readStatuses =
-                messageReadStatusService.findReadStatusesByMessageIdsAndUserId(messageIds, currentUser.getId())
+                messageReadStatusService.findReadStatusesByMessageIdsAndWithoutUserId(messageIds, currentUser.getId())
                         .stream()
-                        .map(messageReadStatus -> messageReadStatus.getMessage().getId())
+                        .map(mrs -> mrs.getMessage().getId())
                         .collect(Collectors.toSet());
 
         return messages.stream()
                 .map(message -> {
                     if (message.getAuthor().getId().equals(currentUser.getId())) {
-                        return messageMapper.toDTO(message, readStatuses.contains(message.getId()));
+                        MessageStatus status =
+                                readStatuses.contains(message.getId()) ? MessageStatus.READ : MessageStatus.SENT;
+
+                        return messageMapper.toDTO(message, status);
                     }
 
                     return messageMapper.toDTO(message);
@@ -185,7 +193,9 @@ public class MessageService {
                 .map(message -> {
                     if (message.getAuthor().getId().equals(currentUser.getId())) {
                         long count = readStatusCount.get(message.getId()) == null ? 0 : readStatusCount.get(message.getId());
-                        return messageMapper.toDTO(message, count > 0, count);
+                        MessageStatus status =
+                                count > 0 ? MessageStatus.READ : MessageStatus.SENT;
+                        return messageMapper.toDTO(message, status, count);
                     }
 
                     return messageMapper.toDTO(message);

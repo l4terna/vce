@@ -1,6 +1,7 @@
 package com.flux.flux.v1._shared.websocket.interceptor;
 
 import com.flux.flux.v1._shared.security.jwt.JwtService;
+import com.flux.flux.v1.user.User;
 import com.flux.flux.v1.user.UserDetailsServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.Message;
@@ -14,7 +15,9 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Component
 @RequiredArgsConstructor
@@ -37,7 +40,7 @@ public class ChannelAuthInterceptor implements ChannelInterceptor {
 
                     try {
                         String username = jwtService.extractUsername(token);
-                        UserDetails userDetails = userDetailsServiceImpl.loadUserByUsername(username);
+                        User userDetails = userDetailsServiceImpl.loadUserByUsername(username);
 
                         if (userDetails != null) {
                             UsernamePasswordAuthenticationToken auth =
