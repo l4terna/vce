@@ -1,4 +1,4 @@
-package com.flux.flux.v1.messagestatus;
+package com.flux.flux.v1.messageread;
 
 import com.flux.flux.v1._shared.model.entity.IdEntity;
 import com.flux.flux.v1.message.Message;
@@ -6,7 +6,6 @@ import com.flux.flux.v1.user.User;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
-import org.springframework.data.annotation.LastModifiedDate;
 
 import java.time.Instant;
 
@@ -20,13 +19,11 @@ import java.time.Instant;
         uniqueConstraints = @UniqueConstraint(columnNames = {"message_id", "user_id"})
 )
 public class MessageReadStatus extends IdEntity {
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
-    private User user;
+    @Column(nullable = false)
+    private Long userId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "message_id", nullable = false)
-    private Message message;
+    @Column(nullable = false)
+    private Long messageId;
 
     @Builder.Default
     private Instant readAt = Instant.now();

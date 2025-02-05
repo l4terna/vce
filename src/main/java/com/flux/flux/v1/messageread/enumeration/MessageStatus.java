@@ -1,4 +1,4 @@
-package com.flux.flux.v1.messagestatus.enumeration;
+package com.flux.flux.v1.messageread.enumeration;
 
 import lombok.Getter;
 

@@ -2,8 +2,8 @@ package com.flux.flux.v1.message;
 
 import com.flux.flux.v1._shared.websocket.dto.WebSocketMessage;
 import com.flux.flux.v1.message.dto.MessageDTO;
-import com.flux.flux.v1.messagestatus.MessageReadStatusService;
-import com.flux.flux.v1.messagestatus.enumeration.MessageStatus;
+import com.flux.flux.v1.messageread.MessageReadStatusService;
+import com.flux.flux.v1.messageread.enumeration.MessageStatus;
 import com.flux.flux.v1.user.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -97,7 +97,7 @@ public class MessageWebSocketService {
 
     private void send(Long channelId, WebSocketMessage message) {
         messagingTemplate.convertAndSend(
-                "/topic/channels/" + channelId + "/messages",
+                "/v1/topic/channels/" + channelId + "/messages",
                 message
         );
     }

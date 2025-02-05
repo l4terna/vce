@@ -20,12 +20,7 @@ services:
       - "6380:6379"
     volumes:
       - redis-data:/data
-    environment:
-      - REDIS_PASSWORD=redis
-    command: sh -c 'redis-server 
-      --requirepass "${REDIS_PASSWORD}"
-      --appendonly yes 
-      --notify-keyspace-events Ex'
+    command: redis-server --requirepass redis --appendonly yes
     networks:
       - spring-network
 

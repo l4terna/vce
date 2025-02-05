@@ -1,4 +1,4 @@
-package com.flux.flux.v1.userstatus;
+package com.flux.flux.v1.userstatus.listener;
 
 import com.flux.flux.v1.usersession.UserSessionService;
 import lombok.RequiredArgsConstructor;

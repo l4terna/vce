@@ -1,7 +1,7 @@
 package com.flux.flux.v1._shared.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.flux.flux.v1.userstatus.UserStatusExpirationListener;
+import com.flux.flux.v1.userstatus.listener.UserStatusExpirationListener;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

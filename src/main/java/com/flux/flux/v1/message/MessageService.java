@@ -12,8 +12,9 @@ import com.flux.flux.v1.message.dto.UpdateMessageDTO;
 import com.flux.flux.v1.message.event.MessageCreatedEvent;
 import com.flux.flux.v1.message.event.MessageDeletedEvent;
 import com.flux.flux.v1.message.event.MessageUpdatedEvent;
-import com.flux.flux.v1.messagestatus.MessageReadStatusService;
-import com.flux.flux.v1.messagestatus.enumeration.MessageStatus;
+import com.flux.flux.v1.messageread.MessageReadStatus;
+import com.flux.flux.v1.messageread.MessageReadStatusService;
+import com.flux.flux.v1.messageread.enumeration.MessageStatus;
 import com.flux.flux.v1.permission.PermissionService;
 import com.flux.flux.v1.permission.enumeration.Permission;
 import com.flux.flux.v1.user.User;
@@ -57,7 +58,7 @@ public class MessageService {
         Message message = Message.builder()
                 .content(createMessageDTO.content())
                 .author(currentUser)
-                .channel(channel)
+                .channelId(channel.getId())
                 .build();
 
         MessageDTO newMessageDTO;
@@ -79,7 +80,7 @@ public class MessageService {
     public MessageDTO update(Long channelId, Long messageId, UpdateMessageDTO updateMessageDTO, User currentUser) {
         Message message = findMessageById(messageId);
 
-        if (!message.getChannel().getId().equals(channelId) ||
+        if (!message.getChannelId().equals(channelId) ||
                 !message.getAuthor().getId().equals(currentUser.getId())) {
             throw new AccessDeniedException("Permission denied");
         }
@@ -117,13 +118,15 @@ public class MessageService {
     public void delete(Long channelId, Long messageId, User currentUser) {
         Message message = findMessageById(messageId);
 
-        if (!message.getChannel().getId().equals(channelId) ||
+        if (!message.getChannelId().equals(channelId) ||
                 !message.getAuthor().getId().equals(currentUser.getId())) {
             throw new AccessDeniedException("Permission denied");
         }
 
-        if (message.getChannel().getType() == ChannelType.VOICE || message.getChannel().getType() == ChannelType.TEXT) {
-            Hub hub = hubService.findHubByChannelId(message.getChannel().getId());
+        Channel channel = channelService.findChannelById(channelId);
+
+        if (channel.getType() == ChannelType.VOICE || channel.getType() == ChannelType.TEXT) {
+            Hub hub = hubService.findHubByChannelId(message.getChannelId());
             permissionService.hasPermissionsThrow(currentUser.getId(), hub.getId(), Permission.SEND_MESSAGES);
         }
 
@@ -167,7 +170,7 @@ public class MessageService {
         Set<Long> readStatuses =
                 messageReadStatusService.findReadStatusesByMessageIdsAndWithoutUserId(messageIds, currentUser.getId())
                         .stream()
-                        .map(mrs -> mrs.getMessage().getId())
+                        .map(MessageReadStatus::getMessageId)
                         .collect(Collectors.toSet());
 
         return messages.stream()
@@ -185,7 +188,7 @@ public class MessageService {
     }
 
     private List<MessageDTO> enrichGroupDirectAndTextMessagesWithStatus(List<Message> messages, User currentUser) {
-        List<Long> messageIds = messages.stream().map(Message::getId).toList();
+        Set<Long> messageIds = messages.stream().map(Message::getId).collect(Collectors.toSet());
 
         Map<Long, Long> readStatusCount = messageReadStatusService.countReadStatusesByMessageIds(messageIds);
 
@@ -201,5 +204,10 @@ public class MessageService {
                     return messageMapper.toDTO(message);
                 })
                 .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public Set<Message> findMessagesByIdsAndChannelId(Set<Long> messageIds, Long channelId) {
+        return messageRepository.findMessagesByIdsAndChannelId(messageIds, channelId);
     }
 }

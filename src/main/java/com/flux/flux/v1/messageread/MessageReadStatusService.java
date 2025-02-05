@@ -1,4 +1,5 @@
-package com.flux.flux.v1.messagestatus;
+package com.flux.flux.v1.messageread;
+
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -12,33 +13,38 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class MessageReadStatusService {
-    private final MessageStatusRepository messageStatusRepository;
+    private final MessageReadStatusRepository messageReadStatusRepository;
 
     @Transactional(readOnly = true)
     public Set<MessageReadStatus> findReadStatusesByMessageIdsAndWithoutUserId(List<Long> messageIds, Long userId) {
-        return messageStatusRepository.findByMessageIdsAndWithoutUserId(messageIds, userId);
+        return messageReadStatusRepository.findAllByMessageIdsAndWithoutUserId(messageIds, userId);
     }
 
     @Transactional(readOnly = true)
     public Set<Long> findReadStatusesByMessageIdAndUserIds(Long messageId, Set<Long> userIds) {
-        return messageStatusRepository.findByMessageIdAndUserIds(messageId, userIds)
+        return messageReadStatusRepository.findAllByMessageIdAndUserIds(messageId, userIds)
                 .stream()
-                .map(mrs -> mrs.getUser().getId())
+                .map(MessageReadStatus::getUserId)
                 .collect(Collectors.toSet());
     }
 
     @Transactional(readOnly = true)
-    public Map<Long, Long> countReadStatusesByMessageIds(List<Long> messageIds) {
-        return messageStatusRepository.countByMessageIds(messageIds)
+    public Set<MessageReadStatus> findReadStatusesByMessageIdsAndUserId(Set<Long> messageIds, Long userId) {
+        return messageReadStatusRepository.findAllByMessageIdsAndUserId(messageIds, userId);
+    }
+
+    @Transactional(readOnly = true)
+    public Map<Long, Long> countReadStatusesByMessageIds(Set<Long> messageIds) {
+        return messageReadStatusRepository.countByMessageIds(messageIds)
                 .stream()
                 .collect(Collectors.toMap(
-                        arr -> arr[0],
-                        arr -> arr[1]
+                        arr -> arr[0], // message id
+                        arr -> arr[1]  // count of reads
                 ));
     }
 
     @Transactional(readOnly = true)
     public long countReadStatusesByMessageId(Long messageId) {
-        return messageStatusRepository.countByMessageId(messageId);
+        return messageReadStatusRepository.countByMessageId(messageId);
     }
 }
