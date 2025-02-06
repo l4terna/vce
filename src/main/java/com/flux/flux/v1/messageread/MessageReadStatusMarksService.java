@@ -1,6 +1,6 @@
 package com.flux.flux.v1.messageread;
 
-import com.flux.flux.v1.message.Message;
+import com.flux.flux.v1._shared.websocket.dto.WebSocketMessage;
 import com.flux.flux.v1.message.MessageService;
 import com.flux.flux.v1.user.User;
 import com.flux.flux.v1.user.UserDetailsServiceImpl;
@@ -10,6 +10,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.security.Principal;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -20,42 +22,60 @@ public class MessageReadStatusMarksService {
     private final MessageReadStatusRepository messageReadStatusRepository;
     private final UserDetailsServiceImpl userDetailsServiceImpl;
     private final SimpMessagingTemplate messagingTemplate;
-    private final MessageReadStatusService messageReadStatusService;
 
     @Transactional
     public void bulkRead(Long channelId, MessageBulkReadDTO messageBulkReadDTO, Principal principal) {
         User user = userDetailsServiceImpl.loadUserByUsername(principal.getName());
-        Set<Message> messages =
-                messageService.findMessagesByIdsAndChannelId(messageBulkReadDTO.messageIds(), channelId);
+        Set<Long> unreadMessageIds =
+                messageService.findUnreadMessagesInChannelByIdsForUser(user.getId(), messageBulkReadDTO.messageIds(), channelId);
 
-        Set<MessageReadStatus> userMessagesReadStatuses =
-                messageReadStatusService.findReadStatusesByMessageIdsAndUserId(messageBulkReadDTO.messageIds(), user.getId());
+        markAsRead(channelId, unreadMessageIds, user);
+    }
 
-        userMessagesReadStatuses.forEach(status -> {
-            messages.removeIf(message -> message.getId().equals(status.getMessageId()));
-        });
+    @Transactional
+    public void bulkReadAll(Long channelId, Principal principal) {
+        User user = userDetailsServiceImpl.loadUserByUsername(principal.getName());
+        Set<Long> unreadMessageIds =
+                messageService.findUnreadMessageIdsInChannelForUser(user.getId(), channelId);
 
-        if (!messages.isEmpty()) {
-            long authorId = messages.stream().findFirst().map((message -> message.getAuthor().getId())).get();
+        markAsRead(channelId, unreadMessageIds, user);
+    }
 
-            Set<MessageReadStatus> messageStatusesToSave = messages.stream()
-                    .map(message -> MessageReadStatus.builder()
+    private void markAsRead(Long channelId, Set<Long> unreadMessageIds, User user) {
+        if (!unreadMessageIds.isEmpty()) {
+            Set<Long> authorIds = messageService.findAuthorIdsByMessageIds(unreadMessageIds);
+
+            Set<Long> authors = messageService.findAuthorIdsByMessageIds(unreadMessageIds);
+
+            Set<MessageReadStatus> messageStatusesToSave = unreadMessageIds.stream()
+                    .map(messageId -> MessageReadStatus.builder()
                             .userId(user.getId())
-                            .messageId(message.getId())
+                            .messageId(messageId)
                             .build())
                     .collect(Collectors.toSet());
 
             messageReadStatusRepository.saveAll(messageStatusesToSave);
 
-            sendReadStatusToMessageAuthor(authorId, channelId, messages);
+            authorIds.forEach(authorId -> {
+                sendReadStatusToMessageAuthor(authorId, channelId, unreadMessageIds);
+            });
         }
     }
 
-    private void sendReadStatusToMessageAuthor(Long authorId, Long channelId, Set<Message> messages) {
+    private void sendReadStatusToMessageAuthor(Long authorId, Long channelId, Set<Long> messageIds) {
+        Map<String, Object> messageRange = new HashMap<>();
+        messageRange.put("from", messageIds.stream().min(Long::compareTo).get());
+        messageRange.put("to", messageIds.stream().max(Long::compareTo).get());
+
+        WebSocketMessage wsMessage =  WebSocketMessage.builder("MESSAGE_READ_STATUS")
+                .add("message_range", messageRange)
+                .add("channel_id", channelId)
+                .build();
+
         messagingTemplate.convertAndSendToUser(
                 authorId.toString(),
                 "/queue/channels/" + channelId + "/messages",
-                messages
+                wsMessage
         );
     }
 }

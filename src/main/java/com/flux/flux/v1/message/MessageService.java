@@ -71,6 +71,7 @@ public class MessageService {
             newMessageDTO = messageMapper.toDTO(messageRepository.save(message));
         }
 
+        messageReadStatusService.createReadStatus(currentUser.getId(), newMessageDTO.id());
         eventPublisher.publishEvent(new MessageCreatedEvent(newMessageDTO, channelId));
 
         return newMessageDTO;
@@ -207,7 +208,17 @@ public class MessageService {
     }
 
     @Transactional(readOnly = true)
-    public Set<Message> findMessagesByIdsAndChannelId(Set<Long> messageIds, Long channelId) {
-        return messageRepository.findMessagesByIdsAndChannelId(messageIds, channelId);
+    public Set<Long> findUnreadMessagesInChannelByIdsForUser(Long userId, Set<Long> messageIds, Long channelId) {
+        return messageRepository.findUnreadMessagesInChannelByIdsForUser(userId, messageIds, channelId);
+    }
+
+    @Transactional(readOnly = true)
+    public Set<Long> findUnreadMessageIdsInChannelForUser(Long userId, Long channelId) {
+        return messageRepository.findUnreadMessageIdsInChannelForUser(userId, channelId);
+    }
+
+    @Transactional(readOnly = true)
+    public Set<Long> findAuthorIdsByMessageIds(Set<Long> messageIds) {
+        return messageRepository.findAuthorIdsByMessageIds(messageIds);
     }
 }

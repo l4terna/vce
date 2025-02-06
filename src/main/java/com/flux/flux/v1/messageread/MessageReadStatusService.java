@@ -15,6 +15,16 @@ import java.util.stream.Collectors;
 public class MessageReadStatusService {
     private final MessageReadStatusRepository messageReadStatusRepository;
 
+    @Transactional
+    public MessageReadStatus createReadStatus(Long userId, Long messageId) {
+        MessageReadStatus mrs = MessageReadStatus.builder()
+                .userId(userId)
+                .messageId(messageId)
+                .build();
+
+        return messageReadStatusRepository.save(mrs);
+    }
+
     @Transactional(readOnly = true)
     public Set<MessageReadStatus> findReadStatusesByMessageIdsAndWithoutUserId(List<Long> messageIds, Long userId) {
         return messageReadStatusRepository.findAllByMessageIdsAndWithoutUserId(messageIds, userId);

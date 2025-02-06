@@ -9,7 +9,6 @@ import java.util.Set;
 
 @Repository
 interface MessageReadStatusRepository extends JpaRepository<MessageReadStatus, Long> {
-
     @Query("SELECT mrs FROM MessageReadStatus mrs " +
             "WHERE mrs.messageId IN :messageIds " +
             "AND mrs.userId != :userId")

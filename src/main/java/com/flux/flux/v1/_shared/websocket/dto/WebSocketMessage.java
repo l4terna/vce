@@ -8,6 +8,7 @@ import java.util.Map;
 @Data
 public class WebSocketMessage {
     private String type;
+
     private Map<String, Object> payload = new HashMap<>();
 
     private WebSocketMessage(String type) {

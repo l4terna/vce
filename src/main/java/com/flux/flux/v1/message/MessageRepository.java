@@ -28,6 +28,19 @@ interface MessageRepository extends JpaRepository<Message, Long> {
             "ORDER BY m.id ASC")
     List<Message> findAllByChannelIdAndAroundId(Long channelId, Long aroundId, Pageable pageable);
 
-    @Query("SELECT m FROM Message m WHERE m.id IN :messageIds AND m.channelId = :channelId")
-    Set<Message> findMessagesByIdsAndChannelId(Set<Long> messageIds, Long channelId);
+    @Query("SELECT DISTINCT m.id FROM Message m " +
+            "LEFT JOIN MessageReadStatus mrs ON mrs.messageId = m.id AND mrs.userId = :userId " +
+            "WHERE m.id IN :messageIds " +
+            "AND m.channelId = :channelId " +
+            "AND mrs IS NULL")
+    Set<Long> findUnreadMessagesInChannelByIdsForUser(Long userId, Set<Long> messageIds, Long channelId);
+
+    @Query("SELECT DISTINCT m.id FROM Message m " +
+            "LEFT JOIN MessageReadStatus mrs ON mrs.messageId = m.id AND mrs.userId = :userId " +
+            "WHERE m.channelId = :channelId AND mrs IS NULL")
+    Set<Long> findUnreadMessageIdsInChannelForUser(Long userId, Long channelId);
+
+    @Query("SELECT DISTINCT m.author.id FROM Message m " +
+            "WHERE m.id IN :messageIds")
+    Set<Long>   findAuthorIdsByMessageIds(Set<Long> messageIds);
 }

@@ -16,7 +16,7 @@ import java.time.Instant;
 @NoArgsConstructor
 @AllArgsConstructor
 @EntityListeners(AuditingEntityListener.class)
-public abstract class BaseEntity extends IdEntity{
+public abstract class BaseEntity extends IdEntity {
     @CreatedDate
     private Instant createdAt;
 

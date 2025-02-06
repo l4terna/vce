@@ -22,4 +22,12 @@ public class MessageReadStatusController {
     ) {
         messageReadStatusMarksService.bulkRead(channelId, messageBulkReadDTO, principal);
     }
+
+    @MessageMapping("/channels/{channelId}/messages/bulk-read-all")
+    public void bulkReadAll(
+            @DestinationVariable Long channelId,
+            Principal principal
+    ) {
+        messageReadStatusMarksService.bulkReadAll(channelId, principal);
+    }
 }
