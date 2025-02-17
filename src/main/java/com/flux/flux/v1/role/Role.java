@@ -23,6 +23,9 @@ public class Role extends BaseEntity {
     @Column(nullable = false)
     private String permissions;
 
+    @Column(nullable = false)
+    private String permissionsMask;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "hub_id", nullable = false)
     private Hub hub;

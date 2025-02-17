@@ -32,7 +32,7 @@ public class PermissionService {
 
         roles.stream()
                 .map(RoleDTO::permissions)
-                .map(Permission::fromString)
+                .map(Permission::fromBase62)
                 .forEach(totalPermissions::or);
 
         return Permission.hasAll(totalPermissions, permissions);
