@@ -45,37 +45,11 @@ public enum Permission {
             this.permissions = new BitSet();
         }
 
-        private Builder(BitSet initial) {
-            this.permissions = (BitSet) initial.clone();
-        }
-
         public Builder add(Permission... permissions) {
             for (Permission permission : permissions) {
                 this.permissions.set(permission.getBitPosition());
             }
             return this;
-        }
-
-        public Builder remove(Permission... permissions) {
-            for (Permission permission : permissions) {
-                this.permissions.clear(permission.getBitPosition());
-            }
-            return this;
-        }
-
-        public Builder addAll() {
-            add(Permission.values());
-            return this;
-        }
-
-        public Builder clear() {
-            permissions.clear();
-            return this;
-        }
-
-        public String serialize() {
-            Base62 base62 = Base62.createInstance();
-            return new String(base62.encode(permissions.toByteArray()));
         }
 
         public BitSet build() {
@@ -87,16 +61,10 @@ public enum Permission {
         return new Builder();
     }
 
-    public static Builder builderFrom(BitSet permissions) {
-        return new Builder(permissions);
-    }
-
-    public static Builder builderFrom(String encoded) {
-        return new Builder(fromString(encoded));
-    }
-
     public static BitSet fromBase62(String encoded) {
-        return fromString(encoded);
+        Base62 base62 = Base62.createInstance();
+        byte[] decoded = base62.decode(encoded.getBytes());
+        return BitSet.valueOf(decoded);
     }
 
     public static boolean has(BitSet permissions, Permission permission) {
@@ -121,9 +89,14 @@ public enum Permission {
         return false;
     }
 
-    public static BitSet fromString(String encoded) {
-        Base62 base62 = Base62.createInstance();
-        byte[] decoded = base62.decode(encoded.getBytes());
-        return BitSet.valueOf(decoded);
+    public static String toBinary(String base62) {
+        BitSet raw = fromBase62(base62);
+
+        StringBuilder sb = new StringBuilder(raw.length());
+        for (int i = 0; i < raw.length(); i++) {
+            sb.append(raw.get(i) ? '1' : '0');
+        }
+
+        return sb.toString();
     }
 }
