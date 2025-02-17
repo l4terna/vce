@@ -8,8 +8,6 @@ import com.flux.flux.v1.hubs.Hub;
 import com.flux.flux.v1.hubs.HubService;
 import com.flux.flux.v1.permission.PermissionService;
 import com.flux.flux.v1.permission.enumeration.Permission;
-import com.flux.flux.v1.user.User;
-import com.flux.flux.v1.user.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
@@ -17,10 +15,9 @@ import org.springframework.messaging.simp.stomp.StompCommand;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.messaging.support.ChannelInterceptor;
 import org.springframework.messaging.support.MessageHeaderAccessor;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Component;
 
-import java.security.Principal;
+import java.util.Objects;
 
 
 @Component
@@ -28,7 +25,6 @@ import java.security.Principal;
 public class ChannelSubscriptionInterceptor implements ChannelInterceptor {
     private final PermissionService permissionService;
     private final HubService hubService;
-    private final UserService userService;
     private final ChannelService channelService;
     private final ChannelMemberService channelMemberService;
 
@@ -39,14 +35,15 @@ public class ChannelSubscriptionInterceptor implements ChannelInterceptor {
         if (accessor != null && StompCommand.SUBSCRIBE.equals(accessor.getCommand())) {
             String destination = accessor.getDestination();
             if (destination != null && destination.startsWith("/topic/channels/")) {
-                User user = extractUser(accessor);
-                Channel channel = extractChannel(user, destination);
+                Long userId = (Long) Objects.requireNonNull(accessor.getSessionAttributes()).get("userId");
+
+                Channel channel = extractChannel(destination);
 
                 if ((channel.getType() == ChannelType.DC || channel.getType() == ChannelType.GROUP_DC)) {
-                    channelMemberService.isMemberThrow(channel.getId(), user.getId());
+                    channelMemberService.isMemberThrow(channel.getId(), userId);
                 } else {
                     Hub hub = hubService.findHubByChannelId(channel.getId());
-                    permissionService.hasPermissionsThrow(user.getId(), hub.getId(), Permission.SEND_MESSAGES);
+                    permissionService.hasPermissionsThrow(userId, hub.getId(), Permission.SEND_MESSAGES);
                 }
             }
         }
@@ -54,17 +51,7 @@ public class ChannelSubscriptionInterceptor implements ChannelInterceptor {
         return message;
     }
 
-    private User extractUser(StompHeaderAccessor accessor) {
-        Principal principal = accessor.getUser();
-
-        if (principal == null) {
-            throw new AccessDeniedException("No authentication data found");
-        }
-
-        return userService.findUserByEmail(principal.getName());
-    }
-
-    private Channel extractChannel(User user, String destination) {
+    private Channel extractChannel(String destination) {
         String[] parts = destination.split("/");
 
         Long channelId = Long.valueOf(parts[3]);

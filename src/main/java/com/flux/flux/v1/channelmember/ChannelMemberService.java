@@ -1,11 +1,16 @@
 package com.flux.flux.v1.channelmember;
 
+import com.flux.flux.v1._shared.model.dto.PageableDTO;
 import com.flux.flux.v1.channel.Channel;
 import com.flux.flux.v1.channel.ChannelService;
+import com.flux.flux.v1.channelmember.dto.ChannelMemberDTO;
 import com.flux.flux.v1.channelmember.dto.CreateChannelMemberDTO;
 import com.flux.flux.v1.user.User;
 import com.flux.flux.v1.user.UserService;
+import com.flux.flux.v1.userpresence.tracking.ChannelTrackingService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,6 +26,17 @@ public class ChannelMemberService {
     private final ChannelService channelService;
     private final UserService userService;
     private final ChannelMemberRepository channelMemberRepository;
+    private final ChannelTrackingService channelTrackingService;
+    private final ChannelMemberMapper channelMemberMapper;
+
+    public Page<ChannelMemberDTO> getDirectOrGroupChannelMembers(Long channelId, PageableDTO pageableDTO) {
+        Pageable pageable = pageableDTO.toPageable();
+
+        Set<Long> userIds = channelTrackingService.getAllOnlineGroupChannelUserIds(channelId);
+
+        return channelMemberRepository.findAllByChannelIdAndAndSortByUserIds(channelId, userIds, pageable)
+                .map(channelMemberMapper::toDTO);
+    }
 
     @Transactional
     public void create(Long channelId, CreateChannelMemberDTO createMemberDTO) {

@@ -1,12 +1,13 @@
 package com.flux.flux.v1.channel;
 
+import com.flux.flux.v1._shared.model.dto.PageableDTO;
 import com.flux.flux.v1.channel.dto.ChannelDTO;
 import com.flux.flux.v1.channel.dto.CreateDirectChannelDTO;
-import com.flux.flux.v1.channel.dto.CreateHubChannelDTO;
 import com.flux.flux.v1.channel.dto.UpdateChannelDTO;
 import com.flux.flux.v1.user.User;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -18,6 +19,13 @@ public class ChannelController {
 
     private final ChannelService channelService;
     private final ChannelCreationService channelCreationService;
+
+    @GetMapping
+    public ResponseEntity<Page<ChannelDTO>> getDirectAndGroupChannels(
+            @Valid @ModelAttribute PageableDTO pageableDTO,
+            @AuthenticationPrincipal User user) {
+        return ResponseEntity.ok(channelService.getDirectAndGroupChannels(pageableDTO, user));
+    }
 
     @PostMapping
     public ResponseEntity<ChannelDTO> createDirectChannel(

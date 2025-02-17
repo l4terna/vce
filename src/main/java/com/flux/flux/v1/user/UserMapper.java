@@ -1,9 +1,10 @@
 package com.flux.flux.v1.user;
 
 import com.flux.flux.v1.user.dto.UserDTO;
+import com.flux.flux.v1.userpresence.UserPresenceManageService;
+import com.flux.flux.v1.userpresence.UserPresenceService;
 import com.flux.flux.v1.usersession.UserSessionService;
-import com.flux.flux.v1.userstatus.UserStatusService;
-import com.flux.flux.v1.userstatus.enumeration.Status;
+import com.flux.flux.v1.userpresence.enumeration.Presence;
 import org.mapstruct.*;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -12,27 +13,21 @@ import java.time.Instant;
 @Mapper(componentModel = "spring")
 public abstract class UserMapper {
     @Autowired
-    private UserStatusService userStatusService;
+    protected UserPresenceService userPresenceService;
 
     @Autowired
-    private UserSessionService userSessionService;
+    protected UserSessionService userSessionService;
 
-    @Mapping(target = "status", expression = "java(getStatus(user))")
-    @Mapping(target = "lastActivity", expression = "java(getLastActivity(user))")
+    @Mapping(target = "presence", expression = "java(userPresenceService.getUserPresence(user.getId()))")
+    @Mapping(target = "lastActivity", expression = "java(getLastActivity(user.getId()))")
     public abstract UserDTO toDTO(User user);
 
-    Status getStatus(User user) {
-        if (userStatusService.existsByUserId(user.getId())) {
-            return Status.ONLINE;
-        }
-        return Status.OFFLINE;
-    }
 
-    Instant getLastActivity(User user) {
-        if (userStatusService.existsByUserId(user.getId())) {
-            return Instant.now();
+    Instant getLastActivity(Long userId) {
+        if (userPresenceService.getUserPresence(userId) == Presence.ONLINE) {
+            return null;
         }
 
-        return userSessionService.getLastActivity(user.getId());
+        return userSessionService.getLastActivity(userId);
     }
 }

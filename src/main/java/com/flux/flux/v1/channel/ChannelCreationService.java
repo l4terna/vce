@@ -65,21 +65,34 @@ public class ChannelCreationService {
         // if members = 2 - Direct Chat, if more - Group Direct Chat
         if (countMembers == 2) {
             channel = channelRepository.findDirectChannelByMemberIds(currentUser.getId(), createChannelDTO.members().get(0))
-                    .orElseGet(() -> createDirectOrGroupChannel(createChannelDTO.members(), ChannelType.DC));
+                    .orElseGet(() -> createDirectChannel(createChannelDTO.members()));
         } else {
-            channel = createDirectOrGroupChannel(createChannelDTO.members(), ChannelType.GROUP_DC);
+            channel = createGroupChannel(createChannelDTO.members(), currentUser);
         }
 
-        return channelMapper.toDTO(channelRepository.save(channel));
+        return channelMapper.toDTO(channel);
     }
 
-    private Channel createDirectOrGroupChannel(List<Long> memberIds, ChannelType type) {
-        if (type != ChannelType.GROUP_DC && type != ChannelType.DC) {
-            throw new ValidationException("type: must be either DC or GROUP_DC");
-        }
-
+    private Channel createDirectChannel(List<Long> memberIds) {
         Channel channel = Channel.builder()
-                .type(type)
+                .type(ChannelType.DC)
+                .build();
+
+        Channel newChan = channelRepository.save(channel);
+
+        CreateChannelMemberDTO createChanMembers = CreateChannelMemberDTO.builder()
+                .users(memberIds)
+                .build();
+
+        channelMemberService.create(newChan.getId(), createChanMembers);
+
+        return newChan;
+    }
+
+    private Channel createGroupChannel(List<Long> memberIds, User currentUser) {
+        Channel channel = Channel.builder()
+                .type(ChannelType.GROUP_DC)
+                .owner(currentUser)
                 .build();
 
         Channel newChan = channelRepository.save(channel);

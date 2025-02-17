@@ -13,7 +13,9 @@ import org.springframework.messaging.support.ChannelInterceptor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.stereotype.Component;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Component
 @RequiredArgsConstructor
@@ -41,8 +43,14 @@ public class ChannelAuthInterceptor implements ChannelInterceptor {
                         if (userDetails != null) {
                             UsernamePasswordAuthenticationToken auth =
                                     new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
-
                             accessor.setUser(auth);
+
+                            Map<String, Object> attrs = accessor.getSessionAttributes();
+                            if (attrs == null) {
+                                attrs = new HashMap<>();
+                            }
+                            attrs.put("userId", userDetails.getId());
+                            accessor.setSessionAttributes(attrs);
                         }
                     } catch (Exception e) {
                         throw new MessagingException("Unauthorized");

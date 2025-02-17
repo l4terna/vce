@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
+import java.util.Set;
 
 @Repository
 interface HubRepository extends JpaRepository<Hub, Long> {
@@ -20,4 +21,8 @@ interface HubRepository extends JpaRepository<Hub, Long> {
             "JOIN HubMember hm ON h.id = hm.hub.id " +
             "WHERE hm.user.id = :userId")
     Page<Hub> findAllByUserId(Pageable pageable, Long userId);
+
+    @Query("SELECT h FROM Hub h JOIN HubMember hm ON h.id = hm.hub.id " +
+            "WHERE hm.user.id = :userId")
+    Set<Long> findAllHubIdsByUserId(Long userId);
 }

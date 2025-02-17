@@ -1,7 +1,7 @@
 package com.flux.flux.v1._shared.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.flux.flux.v1.userstatus.listener.UserStatusExpirationListener;
+import com.flux.flux.v1.userpresence.listener.UserPresenceExpirationListener;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -9,12 +9,12 @@ import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.listener.PatternTopic;
 import org.springframework.data.redis.listener.RedisMessageListenerContainer;
-import org.springframework.data.redis.repository.configuration.EnableRedisRepositories;
 import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 @Configuration
-@EnableRedisRepositories
+@EnableTransactionManagement
 @RequiredArgsConstructor
 public class RedisConfig {
     private final ObjectMapper objectMapper;
@@ -33,6 +33,7 @@ public class RedisConfig {
         template.setHashValueSerializer(serializer);
 
         template.afterPropertiesSet();
+        template.setEnableTransactionSupport(true);
 
         return template;
     }
@@ -40,12 +41,12 @@ public class RedisConfig {
     @Bean
     public RedisMessageListenerContainer redisContainer(
             RedisConnectionFactory connectionFactory,
-            UserStatusExpirationListener userStatusExpirationListener
+            UserPresenceExpirationListener userPresenceExpirationListener
     ) {
         RedisMessageListenerContainer container = new RedisMessageListenerContainer();
         container.setConnectionFactory(connectionFactory);
 
-        container.addMessageListener(userStatusExpirationListener, new PatternTopic("__keyevent@*__:expired"));
+        container.addMessageListener(userPresenceExpirationListener, new PatternTopic("__keyevent@*__:expired"));
 
         return container;
     }

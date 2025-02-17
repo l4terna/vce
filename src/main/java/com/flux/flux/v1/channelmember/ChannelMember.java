@@ -17,7 +17,7 @@ import java.time.Instant;
 @AllArgsConstructor
 @Entity
 @Table(name = "channel_members",
-    uniqueConstraints = @UniqueConstraint(columnNames = {"message_id", "user_id"})
+    uniqueConstraints = @UniqueConstraint(columnNames = {"channel_id", "user_id"})
 )
 public class ChannelMember extends IdEntity {
     @ManyToOne

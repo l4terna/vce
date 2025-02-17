@@ -1,5 +1,6 @@
 package com.flux.flux.v1.channel;
 
+import com.flux.flux.v1._shared.model.dto.PageableDTO;
 import com.flux.flux.v1.category.Category;
 import com.flux.flux.v1.category.CategoryService;
 import com.flux.flux.v1.channel.dto.ChannelDTO;
@@ -12,10 +13,13 @@ import com.flux.flux.v1.permission.enumeration.Permission;
 import com.flux.flux.v1.user.User;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -92,5 +96,16 @@ public class ChannelService {
         permissionService.hasPermissionsThrow(currentUser.getId(), hub.getId(), Permission.MANAGE_CHANNELS);
 
         channelRepository.deleteById(id);
+    }
+
+    @Transactional(readOnly = true)
+    public Set<Channel> findChannelIdsByUserId(Long userId) {
+        return channelRepository.findAllChannelIdsByUserId(userId);
+    }
+
+    @Transactional(readOnly = true)
+    public Page<ChannelDTO> getDirectAndGroupChannels(PageableDTO pageableDTO, User user) {
+        return channelRepository.findAllUserChannels(user.getId(), pageableDTO.toPageable())
+                .map(channelMapper::toDTO);
     }
 }

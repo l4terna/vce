@@ -13,6 +13,8 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Set;
+
 
 @Service
 @RequiredArgsConstructor
@@ -81,5 +83,10 @@ public class HubService {
     public Hub findHubByChannelId(Long channelId) {
         return hubRepository.findHubByChannelId(channelId)
                 .orElseThrow(() -> new EntityNotFoundException("Hub not found by channel id: " + channelId));
+    }
+
+    @Transactional(readOnly = true)
+    public Set<Long> getHubIdsByUserId(Long userId) {
+        return hubRepository.findAllHubIdsByUserId(userId);
     }
 }
