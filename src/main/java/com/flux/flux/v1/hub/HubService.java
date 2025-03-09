@@ -1,8 +1,8 @@
-package com.flux.flux.v1.hubs;
+package com.flux.flux.v1.hub;
 
 import com.flux.flux.v1._shared.model.dto.PageableDTO;
-import com.flux.flux.v1.hubs.dto.HubDTO;
-import com.flux.flux.v1.hubs.dto.UpdateHubDTO;
+import com.flux.flux.v1.hub.dto.HubDTO;
+import com.flux.flux.v1.hub.dto.UpdateHubDTO;
 import com.flux.flux.v1.permission.PermissionService;
 import com.flux.flux.v1.permission.enumeration.Permission;
 import com.flux.flux.v1.user.User;
@@ -85,8 +85,7 @@ public class HubService {
                 .orElseThrow(() -> new EntityNotFoundException("Hub not found by channel id: " + channelId));
     }
 
-    @Transactional(readOnly = true)
-    public Set<Long> getHubIdsByUserId(Long userId) {
+    public Set<Long> findAllHubIdsByUserId(Long userId) {
         return hubRepository.findAllHubIdsByUserId(userId);
     }
 }

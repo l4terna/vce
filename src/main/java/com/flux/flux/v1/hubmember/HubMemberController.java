@@ -1,35 +1,34 @@
 package com.flux.flux.v1.hubmember;
 
-import com.flux.flux.v1._shared.model.dto.PageableDTO;
 import com.flux.flux.v1.hubmember.dto.HubMemberDTO;
 import com.flux.flux.v1.user.User;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/hubs/{hubId}/members")
 @RequiredArgsConstructor
 public class HubMemberController {
     private final HubMemberService hubMemberService;
-    private final HubMemberCreationService hubMemberCreationService;
 
     @PostMapping
     public ResponseEntity<HubMemberDTO> create(
             @PathVariable Long hubId,
             @AuthenticationPrincipal User user
     ) {
-        return ResponseEntity.ok(hubMemberCreationService.create(hubId, user));
+        return ResponseEntity.ok(hubMemberService.create(hubId, user));
     }
 
     @GetMapping
-    public ResponseEntity<Page<HubMemberDTO>> getMembers(
+    public ResponseEntity<List<HubMemberDTO>> getMembers(
             @PathVariable Long hubId,
-            @ModelAttribute PageableDTO pageableDTO
+            @RequestParam(name = "after") Long after
     ) {
-        return ResponseEntity.ok(hubMemberService.getAllMembers(hubId, pageableDTO));
+        return ResponseEntity.ok(hubMemberService.getAllMembers(hubId, after));
     }
 
     @DeleteMapping("/{memberId}")

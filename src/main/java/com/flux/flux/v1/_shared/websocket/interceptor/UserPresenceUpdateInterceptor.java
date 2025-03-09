@@ -1,7 +1,8 @@
 package com.flux.flux.v1._shared.websocket.interceptor;
 
-import com.flux.flux.v1.userpresence.UserPresenceManageService;
+import com.flux.flux.v1.userpresence.event.UserPresenceEvent;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.simp.stomp.StompCommand;
@@ -15,7 +16,7 @@ import java.util.Objects;
 @Component
 @RequiredArgsConstructor
 public class UserPresenceUpdateInterceptor implements ChannelInterceptor {
-    private final UserPresenceManageService userPresenceManageService;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Override
     public Message<?> preSend(Message<?> message, MessageChannel channel) {
@@ -28,13 +29,13 @@ public class UserPresenceUpdateInterceptor implements ChannelInterceptor {
             Long userId = (Long) Objects.requireNonNull(accessor.getSessionAttributes()).get("userId");
             String fingerprint = (String) Objects.requireNonNull(accessor.getSessionAttributes()).get("__fprid");
 
-            userPresenceManageService.update(userId, fingerprint);
+            eventPublisher.publishEvent(new UserPresenceEvent(userId, fingerprint, true));
 
         } else if (StompCommand.DISCONNECT.equals(accessor.getCommand())) {
             Long userId = (Long) Objects.requireNonNull(accessor.getSessionAttributes()).get("userId");
             String fingerprint = (String) Objects.requireNonNull(accessor.getSessionAttributes()).get("__fprid");
 
-            userPresenceManageService.delete(userId, fingerprint);
+            eventPublisher.publishEvent(new UserPresenceEvent(userId, fingerprint, false));
         }
 
         return ChannelInterceptor.super.preSend(message, channel);

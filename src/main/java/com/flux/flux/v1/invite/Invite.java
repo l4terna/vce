@@ -1,7 +1,7 @@
 package com.flux.flux.v1.invite;
 
 import com.flux.flux.v1._shared.model.entity.BaseEntity;
-import com.flux.flux.v1.hubs.Hub;
+import com.flux.flux.v1.hub.Hub;
 import com.flux.flux.v1.user.User;
 import jakarta.persistence.*;
 import lombok.*;

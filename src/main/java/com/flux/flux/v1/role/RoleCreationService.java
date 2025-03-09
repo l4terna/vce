@@ -1,8 +1,8 @@
 package com.flux.flux.v1.role;
 
 import com.flux.flux.v1._shared.exception.EntityAlreadyExistsException;
-import com.flux.flux.v1.hubs.Hub;
-import com.flux.flux.v1.hubs.HubService;
+import com.flux.flux.v1.hub.Hub;
+import com.flux.flux.v1.hub.HubService;
 import com.flux.flux.v1.permission.enumeration.Permission;
 import com.flux.flux.v1.role.dto.CreateRoleDTO;
 import com.flux.flux.v1.role.dto.RoleDTO;
@@ -22,7 +22,7 @@ public class RoleCreationService {
         Hub hub = hubService.findHubById(hubId);
 
         if (roleRepository.existsByHubIdAndName(hubId, createRoleDTO.name())) {
-            throw new EntityAlreadyExistsException("Role with name " + createRoleDTO.name() + " already exists1");
+            throw new EntityAlreadyExistsException("Role with name " + createRoleDTO.name() + " already exists");
         }
 
         String permissionsMask = Permission.toBinary(createRoleDTO.permissions());

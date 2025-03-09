@@ -1,7 +1,7 @@
 package com.flux.flux.v1.permission;
 
 import com.flux.flux.v1.hubmember.HubMember;
-import com.flux.flux.v1.hubmember.HubMemberService;
+import com.flux.flux.v1.hubmember.HubMemberProviderService;
 import com.flux.flux.v1.permission.enumeration.Permission;
 import com.flux.flux.v1.role.RoleService;
 import com.flux.flux.v1.role.dto.RoleDTO;
@@ -17,11 +17,11 @@ import java.util.Set;
 @RequiredArgsConstructor
 public class PermissionService {
     private final RoleService roleService;
-    private final HubMemberService hubMemberService;
+    private final HubMemberProviderService hubMemberProviderService;
 
     @Transactional(readOnly = true)
     public boolean hasPermissions(Long userId, Long hubId, Permission... permissions) {
-        HubMember hubMember = hubMemberService.findMemberByHubIdAndUserId(hubId, userId);
+        HubMember hubMember = hubMemberProviderService.findMemberByHubIdAndUserId(hubId, userId);
 
         if (hubMember.getHub().getOwner().getId().equals(userId)) {
             return true;

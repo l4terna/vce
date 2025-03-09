@@ -105,7 +105,7 @@ public class MessageWebSocketService {
     private void send(String userId, Long channelId, WebSocketMessage message) {
         messagingTemplate.convertAndSendToUser(
                 userId,
-                "/queue/channels/" + channelId + "/messages",
+                    "/queue/channels/" + channelId + "/messages",
                 message
         );
     }

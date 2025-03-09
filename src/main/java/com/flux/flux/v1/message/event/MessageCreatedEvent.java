@@ -6,5 +6,5 @@ import com.flux.flux.v1.message.dto.MessageDTO;
 public record MessageCreatedEvent(
         MessageDTO message,
         Long channelId
-) implements MessageEvent {
+) {
 }

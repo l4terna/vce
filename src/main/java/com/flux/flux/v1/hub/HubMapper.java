@@ -1,6 +1,6 @@
-package com.flux.flux.v1.hubs;
+package com.flux.flux.v1.hub;
 
-import com.flux.flux.v1.hubs.dto.HubDTO;
+import com.flux.flux.v1.hub.dto.HubDTO;
 import com.flux.flux.v1.user.UserMapper;
 import org.mapstruct.Mapper;
 

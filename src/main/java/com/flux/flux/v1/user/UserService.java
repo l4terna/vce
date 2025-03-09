@@ -2,7 +2,7 @@ package com.flux.flux.v1.user;
 
 import com.flux.flux.v1._shared.exception.EntityAlreadyExistsException;
 import com.flux.flux.v1.auth.dto.RegisterDTO;
-import com.flux.flux.v1.hubmember.HubMemberService;
+import com.flux.flux.v1.hubmember.HubMemberProviderService;
 import com.flux.flux.v1.hubmember.dto.HubMemberDTO;
 import com.flux.flux.v1.user.dto.GetUserFilter;
 import com.flux.flux.v1.user.dto.UserDTO;
@@ -21,7 +21,7 @@ public class UserService {
     private final UserMapper userMapper;
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-    private final HubMemberService hubMemberService;
+    private final HubMemberProviderService hubMemberProviderService;
 
     @Transactional(readOnly = true)
     public User findUserByEmail(String email) {
@@ -84,7 +84,7 @@ public class UserService {
                 .orElseThrow(() -> new EntityNotFoundException("User not found"));
 
         if (filter.getHubId() != null) {
-            hubMemberDTO = hubMemberService.findByHubIdAndUserId(filter.getHubId(), userDTO.id());
+            hubMemberDTO = hubMemberProviderService.findByHubIdAndUserId(filter.getHubId(), userDTO.id());
         }
 
         return UserProfileDTO.builder()

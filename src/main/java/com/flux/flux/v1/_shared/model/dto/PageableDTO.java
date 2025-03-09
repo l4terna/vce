@@ -17,17 +17,17 @@ import org.springframework.data.domain.Sort;
 public class PageableDTO {
     @Parameter(description = "Page number", example = "0")
     @PositiveOrZero
-    private Integer page = 0;
+    protected Integer page = 0;
 
     @Parameter(description = "Page size", example = "10")
     @Positive
-    private Integer size = 10;
+    protected Integer size = 10;
 
     @Parameter(description = "Sort field", example = "id")
-    private String sortBy = "id";
+    protected String sortBy = "id";
 
     @Parameter(description = "Sort direction", example = "ASC")
-    private String sortDirection = "ASC";
+    protected String sortDirection = "ASC";
 
     public Pageable toPageable() {
         return PageRequest.of(page, size, Sort.Direction.fromString(sortDirection), sortBy);

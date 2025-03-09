@@ -1,10 +1,10 @@
-package com.flux.flux.v1.hubs;
+package com.flux.flux.v1.hub;
 
 import com.flux.flux.v1._shared.model.dto.PageableDTO;
 import com.flux.flux.v1.channel.dto.HubEntitiesDTO;
-import com.flux.flux.v1.hubs.dto.CreateHubDTO;
-import com.flux.flux.v1.hubs.dto.HubDTO;
-import com.flux.flux.v1.hubs.dto.UpdateHubDTO;
+import com.flux.flux.v1.hub.dto.CreateHubDTO;
+import com.flux.flux.v1.hub.dto.HubDTO;
+import com.flux.flux.v1.hub.dto.UpdateHubDTO;
 import com.flux.flux.v1.user.User;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -18,17 +18,17 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class HubController {
     private final HubService hubService;
-    private final HubCreationService hubCreationService;
     private final HubEntitiesService hubEntitiesService;
+    private final HubCreationService hubCreationService;
 
     @GetMapping
-    public ResponseEntity<Page<HubDTO>> getAllHubs(@ModelAttribute PageableDTO pageableDTO) {
+    public ResponseEntity<Page<HubDTO>> getAllHubs(@Valid @ModelAttribute PageableDTO pageableDTO) {
         return ResponseEntity.ok(hubService.getAllHubs(pageableDTO));
     }
 
     @GetMapping("/@me")
     public ResponseEntity<Page<HubDTO>> getAllUserHubs(
-            @ModelAttribute PageableDTO pageableDTO,
+            @Valid @ModelAttribute PageableDTO pageableDTO,
             @AuthenticationPrincipal User user
     ) {
         return ResponseEntity.ok(hubService.getAllUserHubs(pageableDTO, user));

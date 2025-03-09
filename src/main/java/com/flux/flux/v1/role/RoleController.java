@@ -19,7 +19,7 @@ public class RoleController {
     @GetMapping
     public ResponseEntity<Page<RoleDTO>> getRoles(
             @PathVariable Long hubId,
-            @ModelAttribute PageableDTO pageableDTO
+            @Valid @ModelAttribute PageableDTO pageableDTO
     ) {
         return ResponseEntity.ok(roleService.getHubRoles(hubId, pageableDTO));
     }

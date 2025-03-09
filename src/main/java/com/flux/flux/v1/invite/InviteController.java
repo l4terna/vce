@@ -21,7 +21,7 @@ public class InviteController {
     @GetMapping
     public ResponseEntity<Page<InviteDTO>> getAllInvites(
             @PathVariable Long hubId,
-            @ModelAttribute PageableDTO pageableDTO
+            @Valid @ModelAttribute PageableDTO pageableDTO
     ) {
         return ResponseEntity.ok(inviteService.getAllInvites(hubId, pageableDTO));
     }

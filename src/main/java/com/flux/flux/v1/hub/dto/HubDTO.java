@@ -1,6 +1,6 @@
-package com.flux.flux.v1.hubs.dto;
+package com.flux.flux.v1.hub.dto;
 
-import com.flux.flux.v1.hubs.enumeration.HubType;
+import com.flux.flux.v1.hub.enumeration.HubType;
 import com.flux.flux.v1.user.dto.UserDTO;
 
 import java.time.Instant;

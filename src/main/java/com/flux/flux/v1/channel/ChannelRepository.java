@@ -53,19 +53,12 @@ interface ChannelRepository extends JpaRepository<Channel, Long> {
 
     @EntityGraph(attributePaths = {"owner"})
     @Query("""
-    SELECT c
+    SELECT c.id
     FROM Channel c
     JOIN ChannelMember cm ON c.id = cm.channel.id
     WHERE cm.user.id = :userId
 """)
-    Set<Channel> findAllChannelIdsByUserId(Long userId);
-
-    @Query("""
-    SELECT 1
-    FROM Channel c
-    WHERE c.owner.id = :userId
-""")
-    Boolean isOwnerByUserId(Long userId);
+    Set<Long> findAllChannelIdsByUserId(Long userId);
 
     @Query("""
     SELECT c FROM Channel c JOIN ChannelMember cm ON c.id = cm.channel.id

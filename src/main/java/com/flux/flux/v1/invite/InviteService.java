@@ -1,12 +1,12 @@
 package com.flux.flux.v1.invite;
 
 import com.flux.flux.v1._shared.model.dto.PageableDTO;
-import com.flux.flux.v1.hubs.Hub;
-import com.flux.flux.v1.hubs.HubService;
+import com.flux.flux.v1.hub.Hub;
+import com.flux.flux.v1.hub.HubService;
+import com.flux.flux.v1.hubmember.HubMemberService;
 import com.flux.flux.v1.invite.dto.AcceptInviteDTO;
 import com.flux.flux.v1.invite.dto.CreateInviteDTO;
 import com.flux.flux.v1.invite.dto.InviteDTO;
-import com.flux.flux.v1.hubmember.HubMemberCreationService;
 import com.flux.flux.v1.permission.PermissionService;
 import com.flux.flux.v1.permission.enumeration.Permission;
 import com.flux.flux.v1.user.User;
@@ -18,7 +18,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.security.SecureRandom;
-import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 
@@ -32,7 +31,7 @@ public class InviteService {
 
     private static final String CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqstuvwxyz0123456789";
     private static final int CODE_LENGTH = 10;
-    private final HubMemberCreationService hubMemberCreationService;
+    private final HubMemberService hubMemberService;
     private final PermissionService permissionService;
 
     @Transactional
@@ -80,7 +79,7 @@ public class InviteService {
             throw new AccessDeniedException("Code expired");
         }
 
-        hubMemberCreationService.create(hubId, user);
+        hubMemberService.create(hubId, user);
 
         invite.setCurrentUses(invite.getCurrentUses() + 1);
         inviteRepository.save(invite);

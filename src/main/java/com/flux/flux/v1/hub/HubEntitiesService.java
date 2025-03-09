@@ -1,4 +1,4 @@
-package com.flux.flux.v1.hubs;
+package com.flux.flux.v1.hub;
 
 import com.flux.flux.v1.category.CategoryService;
 import com.flux.flux.v1.category.dto.CategoryDTO;

@@ -3,6 +3,7 @@ package com.flux.flux.v1.usersession;
 import com.flux.flux.v1._shared.model.dto.PageableDTO;
 import com.flux.flux.v1.user.User;
 import com.flux.flux.v1.usersession.dto.UserSessionDTO;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
@@ -17,7 +18,7 @@ public class UserSessionController {
 
     @GetMapping
     public ResponseEntity<Page<UserSessionDTO>> getUserSessions(
-            @ModelAttribute PageableDTO pageableDTO,
+            @Valid @ModelAttribute PageableDTO pageableDTO,
             @AuthenticationPrincipal User user
     ) {
         return ResponseEntity.ok(userSessionService.getUserSessions(pageableDTO, user));

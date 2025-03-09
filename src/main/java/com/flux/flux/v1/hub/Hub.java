@@ -1,7 +1,7 @@
-package com.flux.flux.v1.hubs;
+package com.flux.flux.v1.hub;
 
 import com.flux.flux.v1._shared.model.entity.BaseEntity;
-import com.flux.flux.v1.hubs.enumeration.HubType;
+import com.flux.flux.v1.hub.enumeration.HubType;
 import com.flux.flux.v1.user.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;

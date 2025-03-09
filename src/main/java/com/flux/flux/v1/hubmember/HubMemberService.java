@@ -1,14 +1,20 @@
 package com.flux.flux.v1.hubmember;
 
-import com.flux.flux.v1._shared.model.dto.PageableDTO;
+import com.flux.flux.v1._shared.exception.EntityAlreadyExistsException;
+import com.flux.flux.v1.hub.Hub;
+import com.flux.flux.v1.hub.HubService;
+import com.flux.flux.v1.hub.enumeration.HubType;
 import com.flux.flux.v1.hubmember.dto.HubMemberDTO;
 import com.flux.flux.v1.user.User;
+import com.flux.flux.v1.userpresence.tracking.HubTrackingService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.Set;
 
 
 @Service
@@ -16,22 +22,23 @@ import org.springframework.transaction.annotation.Transactional;
 public class HubMemberService {
     private final HubMemberRepository hubMemberRepository;
     private final HubMemberMapper hubMemberMapper;
+    private final HubTrackingService hubTrackingService;
+    private final HubService hubService;
 
     @Transactional(readOnly = true)
-    public Page<HubMemberDTO> getAllMembers(Long hubId, PageableDTO pageableDTO) {
-        return hubMemberRepository.findAllByHubId(hubId, pageableDTO.toPageable())
-                .map(hubMemberMapper::toDTO);
-    }
+    public List<HubMemberDTO> getAllMembers(Long hubId, Long after) {
+        Set<Long> userIds = hubTrackingService.getAllOnlineUserIds(hubId);
 
-    @Transactional(readOnly = true)
-    public HubMember findMemberById(Long id) {
-        return hubMemberRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Member not found"));
+        return hubMemberRepository.findAllByHubIdAndSortByOnlineUserIds(hubId, userIds, after)
+                .stream()
+                .map(hubMemberMapper::toDTO)
+                .toList();
     }
 
     @Transactional
     public void deleteMember(Long hubId, Long memberId, User currentUser) {
-        HubMember hubMember = findMemberById(memberId);
+        HubMember hubMember = hubMemberRepository.findById(memberId)
+                .orElseThrow(() -> new EntityNotFoundException("Member not found"));
 
         if (hubMember.getHub().getId().equals(hubId) || hubMember.getHub().getOwner().getId().equals(currentUser.getId())) {
             throw new AccessDeniedException("Permission denied");
@@ -40,14 +47,29 @@ public class HubMemberService {
         hubMemberRepository.delete(hubMember);
     }
 
-    @Transactional(readOnly = true)
-    public HubMember findMemberByHubIdAndUserId(Long hubId, Long userId) {
-        return hubMemberRepository.findByUserIdAndHubId(userId, hubId)
-                .orElseThrow(() -> new EntityNotFoundException("Member not found"));
+    @Transactional
+    public HubMember createHubMember(Hub hub, User user) {
+        hubMemberRepository.findByHubAndUser(hub, user)
+                .ifPresent((member) -> {
+                    throw new EntityAlreadyExistsException("Member already exists");
+                });
+
+        HubMember hubMember = HubMember.builder()
+                .hub(hub)
+                .user(user)
+                .build();
+
+        return hubMemberRepository.save(hubMember);
     }
 
-    @Transactional(readOnly = true)
-    public HubMemberDTO findByHubIdAndUserId(Long hubId, Long userId) {
-        return hubMemberMapper.toDTO(findMemberByHubIdAndUserId(hubId, userId));
+    @Transactional
+    public HubMemberDTO create(Long hubId, User user) {
+        Hub hub = hubService.findHubById(hubId);
+
+        if (hub.getType() != HubType.PUBLIC) {
+            throw new AccessDeniedException("Permission denied");
+        }
+
+        return hubMemberMapper.toDTO(createHubMember(hub, user));
     }
 }

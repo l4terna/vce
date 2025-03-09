@@ -1,10 +1,11 @@
 package com.flux.flux.v1.role;
 
 import com.flux.flux.v1._shared.model.entity.BaseEntity;
-import com.flux.flux.v1.hubs.Hub;
+import com.flux.flux.v1.hub.Hub;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
+import org.hibernate.annotations.ColumnTransformer;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
@@ -24,7 +25,12 @@ public class Role extends BaseEntity {
     private String permissions;
 
     @Column(nullable = false)
+    @ColumnTransformer(write = "?::bit varying")
     private String permissionsMask;
+
+    @Column(nullable = false)
+    @Builder.Default
+    private Long priority = 1L;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "hub_id", nullable = false)

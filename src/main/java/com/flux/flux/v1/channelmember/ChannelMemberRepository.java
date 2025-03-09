@@ -1,6 +1,5 @@
 package com.flux.flux.v1.channelmember;
 
-import aj.org.objectweb.asm.commons.Remapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -31,5 +30,5 @@ interface ChannelMemberRepository extends JpaRepository<ChannelMember, Long> {
         CASE WHEN cm.user.id IN :userIds THEN cm.user.id ELSE cm.user.id END,
         cm.user.id ASC
 """)
-    Page<ChannelMember> findAllByChannelIdAndAndSortByUserIds(Long channelId, Iterable<Long> userIds, Pageable pageable);
+    Page<ChannelMember> findAllByChannelIdAndSortByUserIds(Long channelId, Iterable<Long> userIds, Pageable pageable);
 }

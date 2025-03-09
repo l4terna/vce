@@ -1,17 +1,36 @@
 package com.flux.flux.v1.userpresence.tracking;
 
-import lombok.RequiredArgsConstructor;
+import com.flux.flux.v1.hub.HubService;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
+import java.util.Set;
+
 @Service
-@RequiredArgsConstructor
-public class HubTrackingService {
-    private final RedisTemplate<String, Object> redisTemplate;
-
+public class HubTrackingService extends AbstractTrackingService {
     private static final String HUB_ONLINE_MEMBERS = "hub:%d:online_members";
+    private final HubService hubService;
 
-    public void addUserToHub(Long userId, Long hubId) {
-        redisTemplate.opsForSet().add(String.format(HUB_ONLINE_MEMBERS, hubId), userId);
+    public HubTrackingService(RedisTemplate<String, Object> redisTemplate,
+                              HubService hubService,
+                              ApplicationEventPublisher eventPublisher) {
+        super(redisTemplate, eventPublisher);
+        this.hubService = hubService;
+    }
+
+    @Override
+    protected String getKeyFormat() {
+        return HUB_ONLINE_MEMBERS;
+    }
+
+    @Override
+    protected Set<Long> getEntityIdsByUserId(Long userId) {
+        return hubService.findAllHubIdsByUserId(userId);
+    }
+
+    @Override
+    protected String getEntityType() {
+        return "hub";
     }
 }

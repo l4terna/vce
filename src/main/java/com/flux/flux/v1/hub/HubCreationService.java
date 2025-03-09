@@ -1,8 +1,8 @@
-package com.flux.flux.v1.hubs;
+package com.flux.flux.v1.hub;
 
-import com.flux.flux.v1.hubs.dto.CreateHubDTO;
-import com.flux.flux.v1.hubs.dto.HubDTO;
-import com.flux.flux.v1.hubmember.HubMemberCreationService;
+import com.flux.flux.v1.hub.dto.CreateHubDTO;
+import com.flux.flux.v1.hub.dto.HubDTO;
+import com.flux.flux.v1.hubmember.HubMemberService;
 import com.flux.flux.v1.user.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -11,9 +11,9 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @RequiredArgsConstructor
 public class HubCreationService {
-    private final HubMapper hubMapper;
     private final HubRepository hubRepository;
-    private final HubMemberCreationService hubMemberCreationService;
+    private final HubMemberService hubMemberService;
+    private final HubMapper hubMapper;
 
     @Transactional
     public HubDTO create(CreateHubDTO createHubDTO, User currentUser) {
@@ -25,7 +25,7 @@ public class HubCreationService {
 
         Hub savedHub = hubRepository.save(hub);
 
-        hubMemberCreationService.create(savedHub, currentUser);
+        hubMemberService.createHubMember(savedHub, currentUser);
 
         return hubMapper.toDTO(savedHub);
     }

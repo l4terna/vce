@@ -6,15 +6,14 @@ import com.flux.flux.v1.category.CategoryService;
 import com.flux.flux.v1.channel.dto.ChannelDTO;
 import com.flux.flux.v1.channel.dto.UpdateChannelDTO;
 import com.flux.flux.v1.channel.enumeration.ChannelType;
-import com.flux.flux.v1.hubs.Hub;
-import com.flux.flux.v1.hubs.HubService;
+import com.flux.flux.v1.hub.Hub;
+import com.flux.flux.v1.hub.HubService;
 import com.flux.flux.v1.permission.PermissionService;
 import com.flux.flux.v1.permission.enumeration.Permission;
 import com.flux.flux.v1.user.User;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -99,7 +98,7 @@ public class ChannelService {
     }
 
     @Transactional(readOnly = true)
-    public Set<Channel> findChannelIdsByUserId(Long userId) {
+    public Set<Long> findAllChannelIdsByUserId(Long userId) {
         return channelRepository.findAllChannelIdsByUserId(userId);
     }
 

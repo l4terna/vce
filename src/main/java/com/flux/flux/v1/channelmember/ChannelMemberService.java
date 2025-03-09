@@ -3,6 +3,7 @@ package com.flux.flux.v1.channelmember;
 import com.flux.flux.v1._shared.model.dto.PageableDTO;
 import com.flux.flux.v1.channel.Channel;
 import com.flux.flux.v1.channel.ChannelService;
+import com.flux.flux.v1.channel.enumeration.ChannelType;
 import com.flux.flux.v1.channelmember.dto.ChannelMemberDTO;
 import com.flux.flux.v1.channelmember.dto.CreateChannelMemberDTO;
 import com.flux.flux.v1.user.User;
@@ -29,13 +30,21 @@ public class ChannelMemberService {
     private final ChannelTrackingService channelTrackingService;
     private final ChannelMemberMapper channelMemberMapper;
 
-    public Page<ChannelMemberDTO> getDirectOrGroupChannelMembers(Long channelId, PageableDTO pageableDTO) {
-        Pageable pageable = pageableDTO.toPageable();
+    public Page<ChannelMemberDTO> getChannelMembers(Long channelId, PageableDTO pageableDTO) {
+        Channel channel = channelService.findChannelById(channelId);
 
-        Set<Long> userIds = channelTrackingService.getAllOnlineGroupChannelUserIds(channelId);
+        if (channel.getType() == ChannelType.DC || channel.getType() == ChannelType.GROUP_DC) {
+            Pageable pageable = pageableDTO.toPageable();
 
-        return channelMemberRepository.findAllByChannelIdAndAndSortByUserIds(channelId, userIds, pageable)
-                .map(channelMemberMapper::toDTO);
+            Set<Long> userIds = channelTrackingService.getAllOnlineUserIds(channelId);
+
+            return channelMemberRepository.findAllByChannelIdAndSortByUserIds(channelId, userIds, pageable)
+                    .map(channelMemberMapper::toDTO);
+        } else if (channel.getType() == ChannelType.TEXT) {
+//            channelMemberRepository.findAllByChannelIdAndSortByUserIdsWithPermissions(channelId, );
+        }
+
+        return null;
     }
 
     @Transactional

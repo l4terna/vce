@@ -6,9 +6,9 @@ CREATE TABLE roles (
     hub_id BIGINT REFERENCES hubs(id) ON DELETE CASCADE NOT NULL,
     name VARCHAR(255) NOT NULL,
     permissions TEXT NOT NULL,
-    permissions_mask TEXT NOT NULL,
+    permissions_mask BIT VARYING NOT NULL,
     color VARCHAR(7) NOT NULL,
-    priority BIGINT NOT NULL DEFAULT 1,
+    priority BIGINT NOT NULL DEFAULT 1, -- TODO:УБРАТЬ 1
     created_at TIMESTAMPTZ NOT NULL,
     last_modified_at TIMESTAMPTZ NOT NULL
 );

@@ -7,6 +7,9 @@ import java.util.BitSet;
 @Getter
 public enum Permission {
     // General
+//    1100000
+//    00000000001
+//    0000000
     VIEW_CHANNELS(0),
     MANAGE_CHANNELS(1),
     MANAGE_ROLES(2),
@@ -50,6 +53,25 @@ public enum Permission {
                 this.permissions.set(permission.getBitPosition());
             }
             return this;
+        }
+
+        public Builder addAll() {
+            add(Permission.values());
+            return this;
+        }
+
+        public String toBinary() {
+            StringBuilder sb = new StringBuilder(permissions.length());
+            for (int i = 0; i < permissions.length(); i++) {
+                sb.append(permissions.get(i) ? '1' : '0');
+            }
+
+            return sb.toString();
+        }
+
+        public String toBase62() {
+            Base62 base62 = Base62.createInstance();
+            return new String(base62.encode(permissions.toByteArray()));
         }
 
         public BitSet build() {

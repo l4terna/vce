@@ -23,7 +23,7 @@ public class ChannelMemberController {
             @PathVariable Long channelId,
             @ModelAttribute PageableDTO pageable
     ) {
-        return ResponseEntity.ok(channelMemberService.getDirectOrGroupChannelMembers(channelId, pageable));
+        return ResponseEntity.ok(channelMemberService.getChannelMembers(channelId, pageable));
     }
 
     @PostMapping

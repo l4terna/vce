@@ -1,8 +1,7 @@
-package com.flux.flux.v1.hubs.enumeration;
+package com.flux.flux.v1.hub.enumeration;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
-import jakarta.validation.ValidationException;
 
 public enum HubType {
     PRIVATE(0),
