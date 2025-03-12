@@ -1,8 +1,7 @@
 package com.flux.flux.v1.userpresence.tracking;
 
-import com.flux.flux.v1.userpresence.event.UserPresenceChangeEvent;
+import com.flux.flux.v1.userpresence.enumeration.Presence;
 import lombok.RequiredArgsConstructor;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.redis.core.RedisTemplate;
 
 import java.util.Objects;
@@ -12,11 +11,10 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public abstract class AbstractTrackingService {
     protected final RedisTemplate<String, Object> redisTemplate;
-    private final ApplicationEventPublisher eventPublisher;
     
     protected abstract String getKeyFormat();
     protected abstract Set<Long> getEntityIdsByUserId(Long userId);
-    protected abstract String getEntityType();
+    protected abstract void afterChange(Long userId, Long entityId, Presence presence);
 
     public void updateUserPresence(Long userId) {
         Set<Long> entityIds = getEntityIdsByUserId(userId);
@@ -25,7 +23,7 @@ public abstract class AbstractTrackingService {
             String key = String.format(getKeyFormat(), entityId);
             redisTemplate.opsForSet().add(key, userId.toString());
 
-            eventPublisher.publishEvent(new UserPresenceChangeEvent(userId, entityId, getEntityType(), true));
+            afterChange(userId, entityId, Presence.ONLINE);
         });
     }
     
@@ -45,13 +43,16 @@ public abstract class AbstractTrackingService {
         
         entityIds.forEach(entityId -> {
             String key = String.format(getKeyFormat(), entityId);
-            redisTemplate.opsForSet().remove(key, userId.toString());
-            
-            if (Objects.equals(redisTemplate.opsForZSet().size(key), 0L)) {
-                redisTemplate.delete(key);
-            }
 
-            eventPublisher.publishEvent(new UserPresenceChangeEvent(userId, entityId, getEntityType(), false));
+            if (Boolean.TRUE.equals(redisTemplate.opsForSet().isMember(key, userId.toString()))) {
+                redisTemplate.opsForSet().remove(key, userId.toString());
+
+                if (Objects.equals(redisTemplate.opsForSet().size(key), 0L)) {
+                    redisTemplate.delete(key);
+                }
+
+                afterChange(userId, entityId, Presence.OFFLINE);
+            }
         });
     }
 

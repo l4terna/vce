@@ -58,8 +58,9 @@ public class UserService {
     }
 
     @Transactional(readOnly = true)
-    public User findUserById(Long id) {
+    public UserDTO findById(Long id) {
         return userRepository.findById(id)
+                .map(userMapper::toDTO)
                 .orElseThrow(() -> new EntityNotFoundException("User not found"));
     }
 
