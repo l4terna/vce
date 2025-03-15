@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
 import java.util.List;
 import java.util.Set;
 
@@ -29,9 +30,15 @@ public class UserService {
                 .orElseThrow(() -> new EntityNotFoundException("User not found"));
     }
 
+    public UserDTO findByEmail(String email) {
+        return userRepository.findByEmail(email)
+                .map(userMapper::toDTO)
+                .orElseThrow(() -> new EntityNotFoundException("User not found"));
+    }
+
     @Transactional
     public User createUser(RegisterDTO registerDTO) {
-        if(userRepository.existsByEmail(registerDTO.email())) {
+        if (userRepository.existsByEmail(registerDTO.email())) {
             throw new EntityAlreadyExistsException("User already exists");
         }
 
@@ -65,8 +72,13 @@ public class UserService {
     }
 
     @Transactional(readOnly = true)
-    public List<User> findAllByIds(List<Long> users) {
+    public List<User> findAllUsersByIds(Iterable<Long> users) {
         return userRepository.findAllById(users);
+    }
+
+    @Transactional(readOnly = true)
+    public List<UserDTO> findAllByIds(Iterable<Long> users) {
+        return userRepository.findAllById(users).stream().map(userMapper::toDTO).toList();
     }
 
     public UserDTO getMe(User user) {

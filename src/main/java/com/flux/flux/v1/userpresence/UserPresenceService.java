@@ -15,7 +15,7 @@ public class UserPresenceService {
         Object fingerprint = redisTemplate.opsForValue().get(userKey);
 
         if (fingerprint != null) {
-            String userDeviceKey = String.format(UserPresenceManageService.USER_DEVICE_PRESENCE_KEY, userId, fingerprint);
+            String userDeviceKey = String.format(UserPresenceManageService.USER_DEVICE_KEY, userId, fingerprint);
             Object presence = redisTemplate.opsForValue().get(userDeviceKey);
 
             if (presence != null) {

@@ -1,0 +1,30 @@
+package com.flux.flux.v1.channeltyping.enumeration;
+
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonValue;
+
+public enum ChannelTypingStatus {
+    STARTED(0),
+    STOPPED(1);
+
+    private final int value;
+
+    ChannelTypingStatus(int i) {
+        this.value = i;
+    }
+
+    @JsonValue
+    public int getValue() {
+        return value;
+    }
+
+    @JsonCreator
+    public static ChannelTypingStatus fromValue(int value) {
+        for (ChannelTypingStatus status : ChannelTypingStatus.values()) {
+            if (status.getValue() == value) {
+                return status;
+            }
+        }
+        throw new IllegalArgumentException("Unknown TypingStatus value: " + value);
+    }
+}

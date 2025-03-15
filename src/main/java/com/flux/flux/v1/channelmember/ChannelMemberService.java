@@ -52,7 +52,7 @@ public class ChannelMemberService {
         Channel channel = channelService.findChannelById(channelId);
         Set<Long> existingUserIds = channelMemberRepository.findChannelUserIds(channel.getId());
 
-        List<User> users = userService.findAllByIds(
+        List<User> users = userService.findAllUsersByIds(
                 createMemberDTO.users().stream()
                         .filter(userId -> !existingUserIds.contains(userId))
                         .collect(Collectors.toList())

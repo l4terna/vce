@@ -1,7 +1,7 @@
 package com.flux.flux.v1._shared.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.flux.flux.v1.userpresence.listener.UserPresenceExpirationListener;
+import com.flux.flux.v1.channeltyping.listener.ChannelTypingExpirationListener;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -41,12 +41,11 @@ public class RedisConfig {
     @Bean
     public RedisMessageListenerContainer redisContainer(
             RedisConnectionFactory connectionFactory,
-            UserPresenceExpirationListener userPresenceExpirationListener
-    ) {
+            ChannelTypingExpirationListener channelTypingExpirationListener) {
         RedisMessageListenerContainer container = new RedisMessageListenerContainer();
         container.setConnectionFactory(connectionFactory);
 
-        container.addMessageListener(userPresenceExpirationListener, new PatternTopic("__keyevent@*__:expired"));
+        container.addMessageListener(channelTypingExpirationListener, new PatternTopic("__keyevent@*__:expired"));
 
         return container;
     }

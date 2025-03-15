@@ -12,8 +12,8 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class UserPresenceManageService {
     private final RedisTemplate<String, Object> redisTemplate;
-    public static final String USER_DEVICE_PRESENCE_KEY = "user:%d:presence:fingerprint:%s";
-    public static final String USER_PRESENCE_KEY = "user:%d:presence";
+    public static final String USER_DEVICE_KEY = "user:%s:fingerprint:%s";
+    public static final String USER_PRESENCE_KEY = "user:%s:presence";
     private final CompositePresenceTracker compositePresenceTracker;
 
 
@@ -27,7 +27,7 @@ public class UserPresenceManageService {
     }
 
     public void update(Long userId, String fingerprint) {
-        String userDevicePresenceKey = String.format(USER_DEVICE_PRESENCE_KEY, userId, fingerprint);
+        String userDevicePresenceKey = String.format(USER_DEVICE_KEY, userId, fingerprint);
         String userPresenceKey = String.format(USER_PRESENCE_KEY, userId);
 
         redisTemplate.opsForValue().set(userDevicePresenceKey, Presence.ONLINE);
@@ -38,7 +38,7 @@ public class UserPresenceManageService {
     }
 
     public void delete(Long userId, String fingerprint) {
-        String userDevicePresenceKey = String.format(USER_DEVICE_PRESENCE_KEY, userId, fingerprint);
+        String userDevicePresenceKey = String.format(USER_DEVICE_KEY, userId, fingerprint);
         String userPresenceKey = String.format(USER_PRESENCE_KEY, userId);
 
         redisTemplate.delete(userDevicePresenceKey);
