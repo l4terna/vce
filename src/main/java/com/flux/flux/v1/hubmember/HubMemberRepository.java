@@ -29,7 +29,7 @@ interface HubMemberRepository extends JpaRepository<HubMember, Long> {
 """)
     List<HubMember> findAllByHubIdAndSortByOnlineUserIds(Long hubId, Set<Long> userIds, Long after);
 
-    // TODO: ДЛЯ ПОЛУЧЕНИЯ ВСЕГО ЭТОГО ГОВНА
+    // ДЛЯ ПОЛУЧЕНИЯ ЮЗЕРОВ ПО РОЛЯМ
     /**
      * Находит все ID Хабов, где у пользователя есть роль с запрошенными правами (битовой маской).
      * Алгоритм проверки прав:

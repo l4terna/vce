@@ -34,10 +34,8 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             FilterChain filterChain
     ) throws ServletException, IOException {
         try {
-            // TODO: ПОЧИНИТЬ ТУТ ВСЁ
             String authHeader = request.getHeader("Authorization");
-//            String fingerprint = userSessionService.getFingerprint();
-            String fingerprint = "string";
+            String fingerprint = userSessionService.getFingerprint();
 
             if (request.getRequestURI().contains("/auth/login") ||
                     request.getRequestURI().contains("/auth/register") ||
