@@ -1,12 +1,14 @@
 package com.flux.flux.v1.channelmember;
 
-import com.flux.flux.v1._shared.model.dto.PageableDTO;
 import com.flux.flux.v1.channelmember.dto.ChannelMemberDTO;
 import com.flux.flux.v1.channelmember.dto.CreateChannelMemberDTO;
 import com.flux.flux.v1.user.User;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -21,7 +23,7 @@ public class ChannelMemberController {
     @GetMapping
     public ResponseEntity<Page<ChannelMemberDTO>> getChannelMembers(
             @PathVariable Long channelId,
-            @ModelAttribute PageableDTO pageable
+            @PageableDefault(size = 10, page = 0, sort = "id", direction = Sort.Direction.DESC) Pageable pageable
     ) {
         return ResponseEntity.ok(channelMemberService.getChannelMembers(channelId, pageable));
     }

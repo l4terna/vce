@@ -1,6 +1,5 @@
 package com.flux.flux.v1.usersession;
 
-import com.flux.flux.v1._shared.model.dto.PageableDTO;
 import com.flux.flux.v1.token.access.AccessTokenService;
 import com.flux.flux.v1.token.refresh.RefreshTokenService;
 import com.flux.flux.v1.user.User;
@@ -12,6 +11,7 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -113,8 +113,8 @@ public class UserSessionService {
     }
 
     @Transactional(readOnly = true)
-    public Page<UserSessionDTO> getUserSessions(PageableDTO pageableDTO, User currentUser) {
-        return userSessionRepository.findAllAnotherActiveSessions(pageableDTO.toPageable(), findUserSessionByUserId(currentUser.getId()))
+    public Page<UserSessionDTO> getUserSessions(Pageable pageable, User currentUser) {
+        return userSessionRepository.findAllAnotherActiveSessions(pageable, findUserSessionByUserId(currentUser.getId()))
                 .map(userSessionMapper::toDTO);
     }
 

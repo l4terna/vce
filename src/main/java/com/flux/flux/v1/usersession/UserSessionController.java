@@ -1,11 +1,12 @@
 package com.flux.flux.v1.usersession;
 
-import com.flux.flux.v1._shared.model.dto.PageableDTO;
 import com.flux.flux.v1.user.User;
 import com.flux.flux.v1.usersession.dto.UserSessionDTO;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -18,10 +19,10 @@ public class UserSessionController {
 
     @GetMapping
     public ResponseEntity<Page<UserSessionDTO>> getUserSessions(
-            @Valid @ModelAttribute PageableDTO pageableDTO,
+            @PageableDefault(size = 10, page = 0, sort = "id", direction = Sort.Direction.DESC) Pageable pageable,
             @AuthenticationPrincipal User user
     ) {
-        return ResponseEntity.ok(userSessionService.getUserSessions(pageableDTO, user));
+        return ResponseEntity.ok(userSessionService.getUserSessions(pageable, user));
     }
 
     @DeleteMapping("/{id}")

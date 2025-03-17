@@ -1,6 +1,5 @@
 package com.flux.flux.v1.channel;
 
-import com.flux.flux.v1._shared.model.dto.PageableDTO;
 import com.flux.flux.v1.category.Category;
 import com.flux.flux.v1.category.CategoryService;
 import com.flux.flux.v1.channel.dto.ChannelDTO;
@@ -14,6 +13,7 @@ import com.flux.flux.v1.user.User;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -103,8 +103,8 @@ public class ChannelService {
     }
 
     @Transactional(readOnly = true)
-    public Page<ChannelDTO> getDirectAndGroupChannels(PageableDTO pageableDTO, User user) {
-        return channelRepository.findAllUserChannels(user.getId(), pageableDTO.toPageable())
+    public Page<ChannelDTO> getDirectAndGroupChannels(Pageable pageable, User user) {
+        return channelRepository.findAllUserChannels(user.getId(), pageable)
                 .map(channelMapper::toDTO);
     }
 }

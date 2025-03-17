@@ -1,6 +1,5 @@
 package com.flux.flux.v1.hub;
 
-import com.flux.flux.v1._shared.model.dto.PageableDTO;
 import com.flux.flux.v1.channel.dto.HubEntitiesDTO;
 import com.flux.flux.v1.hub.dto.CreateHubDTO;
 import com.flux.flux.v1.hub.dto.HubDTO;
@@ -9,6 +8,9 @@ import com.flux.flux.v1.user.User;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -22,16 +24,16 @@ public class HubController {
     private final HubCreationService hubCreationService;
 
     @GetMapping
-    public ResponseEntity<Page<HubDTO>> getAllHubs(@Valid @ModelAttribute PageableDTO pageableDTO) {
-        return ResponseEntity.ok(hubService.getAllHubs(pageableDTO));
+    public ResponseEntity<Page<HubDTO>> getAllHubs(@PageableDefault(size = 10, page = 0, sort = "id", direction = Sort.Direction.DESC) Pageable pageable) {
+        return ResponseEntity.ok(hubService.getAllHubs(pageable));
     }
 
     @GetMapping("/@me")
     public ResponseEntity<Page<HubDTO>> getAllUserHubs(
-            @Valid @ModelAttribute PageableDTO pageableDTO,
+            @PageableDefault(size = 10, page = 0, sort = "id", direction = Sort.Direction.DESC) Pageable pageable,
             @AuthenticationPrincipal User user
     ) {
-        return ResponseEntity.ok(hubService.getAllUserHubs(pageableDTO, user));
+        return ResponseEntity.ok(hubService.getAllUserHubs(pageable, user));
     }
 
     @PostMapping

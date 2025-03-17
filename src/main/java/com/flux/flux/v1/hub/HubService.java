@@ -1,6 +1,5 @@
 package com.flux.flux.v1.hub;
 
-import com.flux.flux.v1._shared.model.dto.PageableDTO;
 import com.flux.flux.v1.hub.dto.HubDTO;
 import com.flux.flux.v1.hub.dto.UpdateHubDTO;
 import com.flux.flux.v1.permission.PermissionService;
@@ -9,6 +8,7 @@ import com.flux.flux.v1.user.User;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,14 +24,14 @@ public class HubService {
     private final PermissionService permissionService;
 
     @Transactional(readOnly = true)
-    public Page<HubDTO> getAllHubs(PageableDTO pageableDTO) {
-        return hubRepository.findAll(pageableDTO.toPageable())
+    public Page<HubDTO> getAllHubs(Pageable pageable) {
+        return hubRepository.findAll(pageable)
                 .map(hubMapper::toDTO);
     }
 
     @Transactional(readOnly = true)
-    public Page<HubDTO> getAllUserHubs(PageableDTO pageableDTO, User currentUser) {
-        return hubRepository.findAllByUserId(pageableDTO.toPageable(), currentUser.getId())
+    public Page<HubDTO> getAllUserHubs(Pageable pageable, User currentUser) {
+        return hubRepository.findAllByUserId(pageable, currentUser.getId())
                 .map(hubMapper::toDTO);
     }
 

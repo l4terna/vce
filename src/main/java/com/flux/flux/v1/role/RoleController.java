@@ -1,11 +1,13 @@
 package com.flux.flux.v1.role;
 
-import com.flux.flux.v1._shared.model.dto.PageableDTO;
 import com.flux.flux.v1.role.dto.CreateRoleDTO;
 import com.flux.flux.v1.role.dto.RoleDTO;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,9 +21,9 @@ public class RoleController {
     @GetMapping
     public ResponseEntity<Page<RoleDTO>> getRoles(
             @PathVariable Long hubId,
-            @Valid @ModelAttribute PageableDTO pageableDTO
-    ) {
-        return ResponseEntity.ok(roleService.getHubRoles(hubId, pageableDTO));
+            @PageableDefault(size = 10, page = 0, sort = "id", direction = Sort.Direction.DESC) Pageable pageable
+            ) {
+        return ResponseEntity.ok(roleService.getHubRoles(hubId, pageable));
     }
 
     @PostMapping

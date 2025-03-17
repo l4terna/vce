@@ -1,6 +1,5 @@
 package com.flux.flux.v1.channelmember;
 
-import com.flux.flux.v1._shared.model.dto.PageableDTO;
 import com.flux.flux.v1.channel.Channel;
 import com.flux.flux.v1.channel.ChannelService;
 import com.flux.flux.v1.channel.enumeration.ChannelType;
@@ -30,12 +29,10 @@ public class ChannelMemberService {
     private final ChannelTrackingService channelTrackingService;
     private final ChannelMemberMapper channelMemberMapper;
 
-    public Page<ChannelMemberDTO> getChannelMembers(Long channelId, PageableDTO pageableDTO) {
+    public Page<ChannelMemberDTO> getChannelMembers(Long channelId, Pageable pageable) {
         Channel channel = channelService.findChannelById(channelId);
 
         if (channel.getType() == ChannelType.DC || channel.getType() == ChannelType.GROUP_DC) {
-            Pageable pageable = pageableDTO.toPageable();
-
             Set<Long> userIds = channelTrackingService.getAllOnlineUserIds(channelId);
 
             return channelMemberRepository.findAllByChannelIdAndSortByUserIds(channelId, userIds, pageable)

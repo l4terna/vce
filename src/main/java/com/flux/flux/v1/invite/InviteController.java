@@ -1,6 +1,5 @@
 package com.flux.flux.v1.invite;
 
-import com.flux.flux.v1._shared.model.dto.PageableDTO;
 import com.flux.flux.v1.invite.dto.AcceptInviteDTO;
 import com.flux.flux.v1.invite.dto.CreateInviteDTO;
 import com.flux.flux.v1.invite.dto.InviteDTO;
@@ -8,6 +7,9 @@ import com.flux.flux.v1.user.User;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -21,9 +23,9 @@ public class InviteController {
     @GetMapping
     public ResponseEntity<Page<InviteDTO>> getAllInvites(
             @PathVariable Long hubId,
-            @Valid @ModelAttribute PageableDTO pageableDTO
+            @PageableDefault(size = 10, page = 0, sort = "id", direction = Sort.Direction.DESC) Pageable pageable
     ) {
-        return ResponseEntity.ok(inviteService.getAllInvites(hubId, pageableDTO));
+        return ResponseEntity.ok(inviteService.getAllInvites(hubId, pageable));
     }
 
     @PostMapping

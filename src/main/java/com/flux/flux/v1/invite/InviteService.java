@@ -1,6 +1,5 @@
 package com.flux.flux.v1.invite;
 
-import com.flux.flux.v1._shared.model.dto.PageableDTO;
 import com.flux.flux.v1.hub.Hub;
 import com.flux.flux.v1.hub.HubService;
 import com.flux.flux.v1.hubmember.HubMemberService;
@@ -13,6 +12,7 @@ import com.flux.flux.v1.user.User;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -86,8 +86,8 @@ public class InviteService {
     }
 
     @Transactional(readOnly = true)
-    public Page<InviteDTO> getAllInvites(Long hubId, PageableDTO pageableDTO) {
-        return inviteRepository.findAllByHubId(hubId, pageableDTO.toPageable())
+    public Page<InviteDTO> getAllInvites(Long hubId, Pageable pageable) {
+        return inviteRepository.findAllByHubId(hubId, pageable)
                 .map(inviteMapper::toDTO);
     }
 

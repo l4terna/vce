@@ -8,7 +8,7 @@ CREATE TABLE roles (
     permissions TEXT NOT NULL,
     permissions_mask BIT VARYING NOT NULL,
     color VARCHAR(7) NOT NULL,
-    priority BIGINT NOT NULL DEFAULT,
+    priority BIGINT NOT NULL,
     created_at TIMESTAMPTZ NOT NULL,
     last_modified_at TIMESTAMPTZ NOT NULL
 );

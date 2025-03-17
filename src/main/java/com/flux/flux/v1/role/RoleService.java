@@ -1,9 +1,9 @@
 package com.flux.flux.v1.role;
 
-import com.flux.flux.v1._shared.model.dto.PageableDTO;
 import com.flux.flux.v1.role.dto.RoleDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,8 +23,8 @@ public class RoleService {
     }
 
     @Transactional(readOnly = true)
-    public Page<RoleDTO> getHubRoles(Long hubId, PageableDTO pageableDTO) {
-        return roleRepository.findByHubId(hubId, pageableDTO.toPageable())
+    public Page<RoleDTO> getHubRoles(Long hubId, Pageable pageable) {
+        return roleRepository.findByHubId(hubId, pageable)
                 .map(roleMapper::toDTO);
     }
 }
