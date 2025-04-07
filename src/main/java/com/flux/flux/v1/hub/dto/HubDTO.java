@@ -10,6 +10,7 @@ public record HubDTO(
         UserDTO owner,
         String name,
         HubType type,
+        String avatar,
         Instant createdAt
 ) {
 }

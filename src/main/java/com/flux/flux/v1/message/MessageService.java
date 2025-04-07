@@ -12,6 +12,7 @@ import com.flux.flux.v1.message.dto.UpdateMessageDTO;
 import com.flux.flux.v1.message.event.MessageCreatedEvent;
 import com.flux.flux.v1.message.event.MessageDeletedEvent;
 import com.flux.flux.v1.message.event.MessageUpdatedEvent;
+import com.flux.flux.v1.messageattachment.MessageAttachmentService;
 import com.flux.flux.v1.messageread.MessageReadStatus;
 import com.flux.flux.v1.messageread.MessageReadStatusService;
 import com.flux.flux.v1.messageread.enumeration.MessageStatus;
@@ -45,13 +46,14 @@ public class MessageService {
     private final HubService hubService;
     private final ApplicationEventPublisher eventPublisher;
     private final MessageReadStatusService messageReadStatusService;
+    private final MessageAttachmentService messageAttachmentService;
 
     @Transactional
     public MessageDTO create(Long channelId, CreateMessageDTO createMessageDTO, User currentUser) {
         Channel channel = channelService.findChannelById(channelId);
 
         if (channel.getType() == ChannelType.VOICE || channel.getType() == ChannelType.TEXT) {
-            Hub hub = hubService.findHubById(currentUser.getId());
+            Hub hub = hubService.findHubByChannelId(channel.getId());
             permissionService.hasPermissionsThrow(currentUser.getId(), hub.getId(), Permission.SEND_MESSAGES);
         }
 
@@ -69,6 +71,10 @@ public class MessageService {
             newMessageDTO = messageMapper.toDTO(messageRepository.save(message), MessageStatus.SENT, 0);
         } else {
             newMessageDTO = messageMapper.toDTO(messageRepository.save(message));
+        }
+
+        if (createMessageDTO.attachments() != null) {
+            messageAttachmentService.save(createMessageDTO.attachments(), newMessageDTO.id(), currentUser.getId());
         }
 
         messageReadStatusService.createReadStatus(currentUser.getId(), newMessageDTO.id());

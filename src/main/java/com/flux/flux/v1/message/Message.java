@@ -1,6 +1,7 @@
 package com.flux.flux.v1.message;
 
 import com.flux.flux.v1._shared.model.entity.BaseEntity;
+import com.flux.flux.v1.media.Media;
 import com.flux.flux.v1.user.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -8,6 +9,8 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
+
+import java.util.List;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
@@ -26,4 +29,12 @@ public class Message extends BaseEntity {
 
     @Column(nullable = false)
     private String content;
+
+    @OneToMany
+    @JoinTable(
+            name = "message_attachments",
+            joinColumns = @JoinColumn(name = "message_id"),
+            inverseJoinColumns = @JoinColumn(name = "media_id")
+    )
+    private List<Media> attachments;
 }

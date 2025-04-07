@@ -1,9 +1,10 @@
 package com.flux.flux.v1.hub.dto;
 
-import com.flux.flux.v1.hub.enumeration.HubType;
+import org.springframework.web.multipart.MultipartFile;
 
 public record UpdateHubDTO (
         String name,
-        HubType type
+        String type,
+        MultipartFile avatar
 ){
 }

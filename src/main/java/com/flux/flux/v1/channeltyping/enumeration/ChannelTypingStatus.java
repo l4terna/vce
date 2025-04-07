@@ -19,9 +19,9 @@ public enum ChannelTypingStatus {
     }
 
     @JsonCreator
-    public static ChannelTypingStatus fromValue(int value) {
+    public static ChannelTypingStatus fromValue(String value) {
         for (ChannelTypingStatus status : ChannelTypingStatus.values()) {
-            if (status.getValue() == value) {
+            if (status.getValue() == Integer.parseInt(value)) {
                 return status;
             }
         }

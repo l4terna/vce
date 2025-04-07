@@ -7,6 +7,7 @@ import com.flux.flux.v1.message.dto.UpdateMessageDTO;
 import com.flux.flux.v1.user.User;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -27,10 +28,10 @@ public class MessageController {
         return ResponseEntity.ok(messageService.getChannelMessages(channelId, user, filter));
     }
 
-    @PostMapping
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<MessageDTO> createMessage(
             @PathVariable Long channelId,
-            @Valid @RequestBody CreateMessageDTO createMessageDTO,
+            @Valid @ModelAttribute CreateMessageDTO createMessageDTO,
             @AuthenticationPrincipal User user
     ) {
         MessageDTO message = messageService.create(channelId, createMessageDTO, user);
@@ -42,7 +43,7 @@ public class MessageController {
     public ResponseEntity<MessageDTO> updateMessage(
             @PathVariable Long channelId,
             @PathVariable Long messageId,
-            @Valid @RequestBody UpdateMessageDTO updateMessageDTO,
+            @Valid @ModelAttribute UpdateMessageDTO updateMessageDTO,
             @AuthenticationPrincipal User user
     ) {
         MessageDTO message = messageService.update(channelId, messageId, updateMessageDTO, user);

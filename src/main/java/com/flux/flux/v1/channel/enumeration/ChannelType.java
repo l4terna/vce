@@ -23,9 +23,9 @@ public enum ChannelType {
     }
 
     @JsonCreator
-    public static ChannelType fromValue(int value) {
+    public static ChannelType fromValue(String value) {
         for (ChannelType type : values()) {
-            if (type.value == value) {
+            if (type.value == Integer.parseInt(value)) {
                 return type;
             }
         }

@@ -2,6 +2,8 @@ package com.flux.flux.v1.hub;
 
 import com.flux.flux.v1.hub.dto.HubDTO;
 import com.flux.flux.v1.hub.dto.UpdateHubDTO;
+import com.flux.flux.v1.hub.enumeration.HubType;
+import com.flux.flux.v1.hubavatar.HubAvatarService;
 import com.flux.flux.v1.permission.PermissionService;
 import com.flux.flux.v1.permission.enumeration.Permission;
 import com.flux.flux.v1.user.User;
@@ -22,6 +24,7 @@ public class HubService {
     private final HubMapper hubMapper;
     private final HubRepository hubRepository;
     private final PermissionService permissionService;
+    private final HubAvatarService hubAvatarService;
 
     @Transactional(readOnly = true)
     public Page<HubDTO> getAllHubs(Pageable pageable) {
@@ -46,8 +49,16 @@ public class HubService {
             hub.setName(updateHubDTO.name());
         }
 
-        if (updateHubDTO.type() != hub.getType()) {
-            hub.setType(updateHubDTO.type());
+        if (updateHubDTO.type() != null) {
+            HubType type = HubType.fromValue(updateHubDTO.type());
+
+            if (type != hub.getType()) {
+                hub.setType(type);
+            }
+        }
+
+        if (updateHubDTO.avatar() != null && !updateHubDTO.avatar().isEmpty()) {
+            hub.setAvatar(hubAvatarService.update(updateHubDTO.avatar(), hub, currentUser.getId()));
         }
 
         hubRepository.save(hub);

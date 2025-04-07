@@ -18,13 +18,12 @@ public enum HubType {
         return value;
     }
 
-    @JsonCreator
-    public static HubType fromValue(int value) {
+    public static HubType fromValue(String value) {
         for (HubType type : values()) {
-            if (type.value == value) {
+            if (type.value == Integer.parseInt(value)) {
                 return type;
             }
         }
-        throw new IllegalArgumentException("Unknown ChannelType value: " + value);
+        throw new IllegalArgumentException("Unknown hub type value: " + value);
     }
 }

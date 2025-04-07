@@ -11,6 +11,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -36,9 +37,9 @@ public class HubController {
         return ResponseEntity.ok(hubService.getAllUserHubs(pageable, user));
     }
 
-    @PostMapping
+    @PostMapping(consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
     public ResponseEntity<HubDTO> create(
-            @Valid @RequestBody CreateHubDTO createHubDTO,
+            @Valid @ModelAttribute CreateHubDTO createHubDTO,
             @AuthenticationPrincipal User user
     ) {
         return ResponseEntity.ok(hubCreationService.create(createHubDTO, user));
@@ -46,7 +47,7 @@ public class HubController {
 
     @PutMapping("/{id}")
     public ResponseEntity<HubDTO> update(
-            @RequestBody UpdateHubDTO updateHubDTO,
+            @ModelAttribute UpdateHubDTO updateHubDTO,
             @PathVariable Long id,
             @AuthenticationPrincipal User user
     ) {

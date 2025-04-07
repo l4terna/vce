@@ -4,6 +4,7 @@ import com.flux.flux.v1.user.dto.UserDTO;
 import lombok.Builder;
 
 import java.time.Instant;
+import java.util.List;
 
 @Builder(toBuilder = true)
 public record MessageDTO(
@@ -14,6 +15,7 @@ public record MessageDTO(
         UserDTO author,
         Long channelId,
         Integer status,
-        Long readByCount // only for GROUP_DC, TEXT channels
+        Long readByCount, // only for GROUP_DC, TEXT channels,
+        List<String> attachments
 ) {
 }

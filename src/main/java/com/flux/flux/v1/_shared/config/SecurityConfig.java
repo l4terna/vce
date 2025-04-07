@@ -3,7 +3,6 @@ package com.flux.flux.v1._shared.config;
 import com.flux.flux.v1._shared.exception.handler.AccessDeniedHandlerImpl;
 import com.flux.flux.v1._shared.security.jwt.JwtAuthFilter;
 import com.flux.flux.v1._shared.security.jwt.RestAuthenticationEntryPoint;
-import com.flux.flux.v1.user.UserDetailsServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -27,7 +26,6 @@ import java.util.Arrays;
 @RequiredArgsConstructor
 public class SecurityConfig {
     private final JwtAuthFilter jwtAuthFilter;
-    private final UserDetailsServiceImpl userDetailsServiceImpl;
     private final RestAuthenticationEntryPoint restAuthenticationEntryPoint;
     private final AccessDeniedHandlerImpl accessDeniedHandlerImpl;
 
@@ -45,6 +43,7 @@ public class SecurityConfig {
                                 "/api/v1/auth/login",
                                 "/api/v1/auth/register",
                                 "/api/v1/auth/refresh",
+                                "/api/v1/media/**",
                                 "/swagger-ui/**",
                                 "/swagger-ui.html",
                                 "/v3/api-docs/**",

@@ -25,3 +25,11 @@ databaseChangeLog:
       file: db/changelog/changes/13_create_messages.sql
   - include:
       file: db/changelog/changes/14_create_message_read_statuses.sql
+  - include:
+      file: db/changelog/changes/15_create_media.sql
+  - include:
+      file: db/changelog/changes/16_create_user_avatars.sql
+  - include:
+      file: db/changelog/changes/17_create_hub_avatars.sql
+  - include:
+      file: db/changelog/changes/18_create_message_attachments.sql
